@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>DigiStamp</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<!-- Willkommen -->
+<section id="welcome-screen">
+    <div class="card">
+        <img class="coffee-icon" src="img/tasse.png" alt="Kaffeetasse">
+        <h1 class="title">DigiStamp</h1>
+        <p class="subtitle text-center">
+            Herzlich Willkommen bei deiner digitalen Stempelkarte!
+        </p>
+        <button class="primary main-button" id="btn-welcome-next">Weiter</button>
+    </div>
+</section>
+
+<!-- Login -->
+<section id="login-screen" style="display:none;">
+    <div class="card">
+        <h1 class="title">DigiStamp</h1>
+
+        <input class="input" type="email" id="login-email" placeholder="E-Mail-Adresse">
+        <input class="input" type="password" id="login-password" placeholder="Passwort">
+
+        <div class="button-row">
+            <button class="secondary" id="btn-to-register">Registrieren</button>
+            <button class="primary" id="btn-login">Login</button>
+        </div>
+    </div>
+</section>
+
+<!-- Registrierung -->
+<section id="register-screen" style="display:none;">
+    <div class="card">
+        <h2 class="title-small">Registrierung</h2>
+
+        <input class="input" type="text" id="reg-name" placeholder="Name">
+        <input class="input" type="email" id="reg-email" placeholder="E-Mail-Adresse">
+        <input class="input" type="password" id="reg-password" placeholder="Passwort">
+
+        <div class="button-row">
+            <button class="secondary" id="btn-register-back">Zurück</button>
+            <button class="primary" id="btn-register-save">Weiter</button>
+        </div>
+    </div>
+</section>
+
+<!-- Stempelkarte -->
+<section id="stampcard-screen" style="display:none;">
+    <div class="card">
+        <div class="top-bar">
+            <span id="hello-name">Hallo Gast</span>
+            <button class="icon-button" id="btn-open-profile">⋯</button>
+        </div>
+
+        <div class="stampcard-box">
+            <p class="stampcard-title">Stempelkarte</p>
+
+            <div class="stamp-row">
+                <span class="stamp-circle"></span>
+                <span class="stamp-circle"></span>
+                <span class="stamp-circle"></span>
+                <span class="stamp-circle"></span>
+                <span class="stamp-circle"></span>
+            </div>
+
+            <p class="stamp-text" id="stamp-text">Noch 5 Kaffee bis gratis</p>
+        </div>
+
+        <button class="primary main-button" id="btn-scan">Karte scannen</button>
+    </div>
+</section>
+
+<!-- 1 Stempel hinzugefügt -->
+<section id="stampadded-screen" style="display:none;">
+    <div class="card">
+        <div class="card-header"></div>
+        <h2 class="title-small text-center">1 Stempel hinzugefügt</h2>
+        <p class="subtitle text-center">5 Stempel fehlen noch.</p>
+        <button class="primary main-button" id="btn-stampadded-next">Weiter</button>
+    </div>
+</section>
+
+<!-- Gratis Kaffee einlösen -->
+<section id="freecoffee-screen" style="display:none;">
+    <div class="card">
+        <div class="card-header"></div>
+        <h2 class="title-small text-center">Gratis Kaffee einlösen?</h2>
+        <p class="subtitle text-center" id="freecoffee-text">
+            Du hast 5 Stempel gesammelt.
+        </p>
+        <div class="button-row">
+            <button class="secondary" id="btn-free-back">Zurück</button>
+            <button class="primary" id="btn-free-redeem">Einlösen</button>
+        </div>
+    </div>
+</section>
+
+<!-- Profil -->
+<section id="profile-screen" style="display:none;">
+    <div class="card">
+        <div class="top-bar">
+            <h2 class="title-small">Profil</h2>
+            <button class="secondary small-btn" id="btn-logout">Logout</button>
+        </div>
+
+        <input class="input" id="profile-name" placeholder="Name">
+        <input class="input" id="profile-email" placeholder="E-Mail">
+        <input class="input" id="profile-password" placeholder="Passwort" type="password">
+
+        <button class="primary main-button" id="btn-profile-back">Zurück</button>
+    </div>
+</section>
+
+<script src="app.js"></script>
+</body>
+</html>
