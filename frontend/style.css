@@ -232,7 +232,7 @@ button:active {
     display: block;
     margin: 0 auto 30px;
     object-fit: contain;
-    border: none;
+    border: none !important;
     box-shadow: none;
 }
 
