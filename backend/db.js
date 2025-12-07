@@ -10,7 +10,8 @@ db.serialize(() => {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT,
       email TEXT UNIQUE,
-      password TEXT
+      password TEXT,
+      stamps INTEGER DEFAULT 0
     )
   `);
 });
