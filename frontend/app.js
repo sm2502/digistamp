@@ -75,6 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Profil-Inputs
     const profileNameInput = document.getElementById("profile-name");
     const profileEmailInput = document.getElementById("profile-email");
+    const profilePasswordInput = document.getElementById("profile-password");
 
     // Welcome → Login
     if (btnWelcomeNext) {
@@ -252,21 +253,49 @@ document.addEventListener("DOMContentLoaded", () => {
         btnOpenProfile.addEventListener("click", () => {
             if (profileNameInput) profileNameInput.value = currentName || "";
             if (profileEmailInput) profileEmailInput.value = currentEmail || "";
+            if (profilePasswordInput) profilePasswordInput.value = "";
             showScreen("profile-screen");
         });
     }
 
     // Profil → Zurück (Änderungen übernehmen)
     if (btnProfileBack) {
-        btnProfileBack.addEventListener("click", () => {
-            if (profileNameInput && profileNameInput.value.trim() !== "") {
-                currentName = profileNameInput.value.trim();
+        btnProfileBack.addEventListener("click", async () => {
+            if (!currentUserId) {
+                alert("Bitte zuerst einloggen.");
+                return;
             }
-            if (profileEmailInput && profileEmailInput.value.trim() !== "") {
-                currentEmail = profileEmailInput.value.trim();
+
+            const name = profileNameInput ? profileNameInput.value.trim() : "";
+            const email = profileEmailInput ? profileEmailInput.value.trim() : "";
+            const password = profilePasswordInput ? profilePasswordInput.value.trim() : "";
+
+            try {
+                const res = await fetch(`${API_BASE}/api/users/${currentUserId}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ name, email, password })
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    alert(data.error || "Fehler beim Aktualisieren des Profils");
+                    return;
+                }
+
+                // State im Frontend mit dem aktualisierten User abgleichen
+                currentName = data.name;
+                currentEmail = data.email;
+                
+                stamps = data.stamps;
+
+                updateStampCard();
+                showScreen("stampcard-screen");
+            } catch (err) {
+                console.error(err);
+                alert("Backend nicht erreichbar");
             }
-            updateStampCard();
-            showScreen("stampcard-screen");
         });
     }
 
