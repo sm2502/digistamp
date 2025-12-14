@@ -1,3 +1,4 @@
+// unterstützung von ChatGpt
 // Hilfsfunktion: nur einen Screen anzeigen
 function showScreen(id) {
     const screens = [

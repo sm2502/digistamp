@@ -149,7 +149,7 @@ button:active {
     border-radius: 14px;
 }
 
-/* Icon-Button für die drei Punkte */
+/* drei Punkte */
 
 .icon-button {
     background: rgba(255, 255, 255, 0.85);
@@ -165,7 +165,7 @@ button:active {
     color: #000000;;
 }
 
-/* Welcome Screen */
+/* Willkommen Screen */
 
 #welcome-screen .card {
     display: flex;
@@ -189,7 +189,6 @@ button:active {
 }
 
 /* Top-Bar */
-
 .top-bar {
     color: #FFFFFF;
     display: flex;
@@ -199,7 +198,6 @@ button:active {
 }
 
 /* Stempelkarte */
-
 .stampcard-box {
     margin-top: 10px;
     padding: 20px;
@@ -280,7 +278,7 @@ button:active {
     box-shadow: none;
 }
 
-/* von Chati */
+/* von ChatGpt */
 section {
   animation: fadeIn 0.4s ease;
 }
@@ -292,7 +290,6 @@ section {
 
 
 /* Mobile */
-
 @media (max-width: 400px) {
     .card {
         width: 100%;
