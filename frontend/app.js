@@ -73,28 +73,28 @@ document.addEventListener("DOMContentLoaded", () => {
     const profileNameInput  = document.getElementById("profile-name");
     const profileEmailInput = document.getElementById("profile-email");
 
-    // Welcome → Login
+    // Welcome -> Login
     if (btnWelcomeNext) {
         btnWelcomeNext.addEventListener("click", () => {
             showScreen("login-screen");
         });
     }
 
-    // Login → Registrierung
+    // Login -> Registrierung
     if (btnToRegister) {
         btnToRegister.addEventListener("click", () => {
             showScreen("register-screen");
         });
     }
 
-    // Registrierung → Zurück → Login
+    // Registrierung -> Zurück -> Login
     if (btnRegisterBack) {
         btnRegisterBack.addEventListener("click", () => {
             showScreen("login-screen");
         });
     }
 
-    // Registrierung speichern → Stempelkarte
+    // Registrierung speichern -> Stempelkarte
     if (btnRegisterSave) {
         btnRegisterSave.addEventListener("click", () => {
             const name = document.getElementById("reg-name").value.trim();
@@ -109,7 +109,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Login → Stempelkarte (einfacher Dummy-Login)
+    // Login -> Stempelkarte
     if (btnLogin) {
         btnLogin.addEventListener("click", () => {
             const email = document.getElementById("login-email").value.trim();
@@ -122,23 +122,23 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Karte scannen → Stempel erhöhen
+    // Karte scannen -> Stempel erhöhen
     if (btnScan) {
         btnScan.addEventListener("click", () => {
             stamps++;
             if (stamps >= maxStamps) {
-                // genug Stempel → Gratis Kaffee Screen
+                // genug Stempel -> Gratis Kaffee
                 updateStampCard();
                 showScreen("freecoffee-screen");
             } else {
-                // sonst: 1 Stempel hinzugefügt Screen
+                // sonst: 1 Stempel hinzugefügt
                 updateStampCard();
                 showScreen("stampadded-screen");
             }
         });
     }
 
-    // "1 Stempel hinzugefügt" → zurück zur Stempelkarte
+    // "1 Stempel hinzugefügt" -> zurück zur Stempelkarte
     if (btnStampNext) {
         btnStampNext.addEventListener("click", () => {
             updateStampCard();
@@ -146,7 +146,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Gratis Kaffee → Zurück
+    // Gratis Kaffee -> Zurück
     if (btnFreeBack) {
         btnFreeBack.addEventListener("click", () => {
             updateStampCard();
@@ -154,7 +154,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Gratis Kaffee einlösen → Stempel auf 0
+    // Gratis Kaffee einlösen -> Stempel auf 0
     if (btnFreeRedeem) {
         btnFreeRedeem.addEventListener("click", () => {
             stamps = 0;
@@ -172,7 +172,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Profil → Zurück (Änderungen übernehmen)
+    // Profil -> Zurück (Änderungen übernehmen)
     if (btnProfileBack) {
         btnProfileBack.addEventListener("click", () => {
             if (profileNameInput && profileNameInput.value.trim() !== "") {
