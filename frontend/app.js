@@ -29,13 +29,10 @@ const API_BASE = "http://localhost:3000";
 const LS_KEY = "digistamp_session_v1";
 
 function saveSession() {
-    const payload = {
-        currentUserId,
-        currentName,
-        currentEmail,
-        stamps
-    };
-    localStorage.setItem(LS_KEY, JSON.stringify(payload));
+    localStorage.setItem(
+        LS_KEY,
+        JSON.stringify({ currentUserId, currentName, currentEmail, stamps })
+    );
 }
 
 function clearSession() {
@@ -46,9 +43,9 @@ function loadSession() {
     try {
         const raw = localStorage.getItem(LS_KEY);
         if (!raw) return false;
-        const data = JSON.parse(raw);
 
-        if (!data || !data.currentUserId) return false;
+        const data = JSON.parse(raw);
+        if (!data.currentUserId) return false;
 
         currentUserId = data.currentUserId;
         currentName = data.currentName || "";
@@ -62,12 +59,27 @@ function loadSession() {
 }
 
 // ==========================
-// UX helpers: message + loading
+// UX helpers (screen-based)
 // ==========================
-function showMsg(text, type = "info") {
-    const box = document.getElementById("app-msg");
+function getMsgBox(screen) {
+    const map = {
+        login: "login-msg",
+        register: "register-msg",
+        stampcard: "stamp-msg",
+        freecoffee: "freecoffee-msg",
+        profile: "profile-msg"
+    };
+    return document.getElementById(map[screen]);
+}
+
+function hideMsg(screen) {
+    const box = getMsgBox(screen);
+    if (box) box.style.display = "none";
+}
+
+function showMsg(screen, text, type = "info") {
+    const box = getMsgBox(screen);
     if (!box) {
-        // Fallback
         alert(text);
         return;
     }
@@ -75,8 +87,6 @@ function showMsg(text, type = "info") {
     box.style.display = "block";
     box.textContent = text;
 
-    // simple styling by type
-    // (no fancy CSS required)
     const styles = {
         info:  { background: "#eef2ff", border: "1px solid #c7d2fe", color: "#1e1b4b" },
         ok:    { background: "#ecfdf5", border: "1px solid #a7f3d0", color: "#064e3b" },
@@ -89,7 +99,6 @@ function showMsg(text, type = "info") {
     box.style.border = s.border;
     box.style.color = s.color;
 
-    // auto-hide after a bit (except errors)
     if (type !== "error") {
         window.clearTimeout(showMsg._t);
         showMsg._t = window.setTimeout(() => {
@@ -98,11 +107,11 @@ function showMsg(text, type = "info") {
     }
 }
 
-function setLoading(btn, isLoading, loadingText = "Bitte warten...") {
+function setLoading(btn, isLoading, text = "Bitte warten...") {
     if (!btn) return;
     if (isLoading) {
         btn.dataset._oldText = btn.textContent;
-        btn.textContent = loadingText;
+        btn.textContent = text;
         btn.disabled = true;
     } else {
         btn.textContent = btn.dataset._oldText || btn.textContent;
@@ -125,7 +134,7 @@ const maxStamps = 5;
 // ==========================
 function updateStampCard() {
     const helloNameEl = document.getElementById("hello-name");
-    const stampInfoEl = document.getElementById("stamp-text");
+    const stampTextEl = document.getElementById("stamp-text");
     const freeCoffeeText = document.getElementById("freecoffee-text");
     const circles = document.querySelectorAll(".stamp-circle");
 
@@ -138,8 +147,8 @@ function updateStampCard() {
     });
 
     const remaining = maxStamps - stamps;
-    if (stampInfoEl) {
-        stampInfoEl.textContent =
+    if (stampTextEl) {
+        stampTextEl.textContent =
             remaining > 0
                 ? `Noch ${remaining} Kaffee bis gratis`
                 : "Du hast einen Gratis Kaffee!";
@@ -149,8 +158,9 @@ function updateStampCard() {
         freeCoffeeText.textContent = `Du hast ${maxStamps} Stempel gesammelt.`;
     }
 
-    // keep localStorage in sync (only if logged in)
-    if (currentUserId) saveSession();
+    if (currentUserId) {
+        saveSession();
+    }
 }
 
 // ==========================
@@ -158,43 +168,52 @@ function updateStampCard() {
 // ==========================
 document.addEventListener("DOMContentLoaded", () => {
 
+    const $ = id => document.getElementById(id);
+
     // Buttons
-    const btnWelcomeNext  = document.getElementById("btn-welcome-next");
-    const btnToRegister   = document.getElementById("btn-to-register");
-    const btnLogin        = document.getElementById("btn-login");
-    const btnRegisterBack = document.getElementById("btn-register-back");
-    const btnRegisterSave = document.getElementById("btn-register-save");
-    const btnScan         = document.getElementById("btn-scan");
-    const btnStampNext    = document.getElementById("btn-stampadded-next");
-    const btnFreeBack     = document.getElementById("btn-free-back");
-    const btnFreeRedeem   = document.getElementById("btn-free-redeem");
-    const btnOpenProfile  = document.getElementById("btn-open-profile");
-    const btnProfileBack  = document.getElementById("btn-profile-back");
-    const btnLogout       = document.getElementById("btn-logout");
+    const btnWelcomeNext  = $("btn-welcome-next");
+    const btnToRegister   = $("btn-to-register");
+    const btnLogin        = $("btn-login");
+    const btnRegisterBack = $("btn-register-back");
+    const btnRegisterSave = $("btn-register-save");
+    const btnScan         = $("btn-scan");
+    const btnStampNext    = $("btn-stampadded-next");
+    const btnFreeBack     = $("btn-free-back");
+    const btnFreeRedeem   = $("btn-free-redeem");
+    const btnOpenProfile  = $("btn-open-profile");
+    const btnProfileBack  = $("btn-profile-back");
+    const btnLogout       = $("btn-logout");
 
-    // Profile Inputs
-    const profileNameInput     = document.getElementById("profile-name");
-    const profileEmailInput    = document.getElementById("profile-email");
-    const profilePasswordInput = document.getElementById("profile-password");
+    // Inputs
+    const loginEmail = $("login-email");
+    const loginPassword = $("login-password");
+    const regName = $("reg-name");
+    const regEmail = $("reg-email");
+    const regPassword = $("reg-password");
+    const profileName = $("profile-name");
+    const profileEmail = $("profile-email");
+    const profilePassword = $("profile-password");
 
-    // Welcome → Login
+    // Auto-hide messages while typing
+    loginEmail?.addEventListener("input", () => hideMsg("login"));
+    loginPassword?.addEventListener("input", () => hideMsg("login"));
+    regName?.addEventListener("input", () => hideMsg("register"));
+    regEmail?.addEventListener("input", () => hideMsg("register"));
+    regPassword?.addEventListener("input", () => hideMsg("register"));
+    profileName?.addEventListener("input", () => hideMsg("profile"));
+    profileEmail?.addEventListener("input", () => hideMsg("profile"));
+    profilePassword?.addEventListener("input", () => hideMsg("profile"));
+
     btnWelcomeNext?.addEventListener("click", () => showScreen("login-screen"));
-
-    // Login → Register
     btnToRegister?.addEventListener("click", () => showScreen("register-screen"));
-
-    // Register → Back
     btnRegisterBack?.addEventListener("click", () => showScreen("login-screen"));
 
-    // ==========================
-    // Auto-login from localStorage
-    // ==========================
+    // Auto-login
     if (loadSession()) {
         updateStampCard();
-        showMsg(`Willkommen zurück, ${currentName || "Gast"}!`, "ok");
+        showMsg("login", `Willkommen zurück, ${currentName}!`, "ok");
         showScreen("stampcard-screen");
     } else {
-        updateStampCard();
         showScreen("welcome-screen");
     }
 
@@ -202,12 +221,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // Registrierung
     // ==========================
     btnRegisterSave?.addEventListener("click", async () => {
-        const name     = document.getElementById("reg-name").value.trim();
-        const email    = document.getElementById("reg-email").value.trim();
-        const password = document.getElementById("reg-password").value.trim();
-
-        if (!email || !password) {
-            showMsg("Bitte E-Mail und Passwort eingeben.", "warn");
+        if (!regEmail.value || !regPassword.value) {
+            showMsg("register", "Bitte E-Mail und Passwort eingeben.", "warn");
             return;
         }
 
@@ -216,29 +231,27 @@ document.addEventListener("DOMContentLoaded", () => {
             const res = await fetch(`${API_BASE}/api/register`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ name, email, password })
+                body: JSON.stringify({
+                    name: regName.value.trim(),
+                    email: regEmail.value.trim(),
+                    password: regPassword.value.trim()
+                })
             });
 
             const data = await res.json();
-
-            if (!res.ok) {
-                showMsg(data.error || "Fehler bei der Registrierung", "error");
-                return;
-            }
+            if (!res.ok) return showMsg("register", data.error, "error");
 
             currentUserId = data.id;
-            currentName   = data.name || "";
-            currentEmail  = data.email;
-            stamps        = data.stamps || 0;
+            currentName = data.name;
+            currentEmail = data.email;
+            stamps = data.stamps;
 
-            saveSession();
             updateStampCard();
-            showMsg("Registrierung erfolgreich 🎉", "ok");
+            showMsg("register", "Registrierung erfolgreich 🎉", "ok");
             showScreen("stampcard-screen");
 
-        } catch (err) {
-            console.error(err);
-            showMsg("Backend nicht erreichbar.", "error");
+        } catch {
+            showMsg("register", "Backend nicht erreichbar.", "error");
         } finally {
             setLoading(btnRegisterSave, false);
         }
@@ -248,11 +261,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // Login
     // ==========================
     btnLogin?.addEventListener("click", async () => {
-        const email    = document.getElementById("login-email").value.trim();
-        const password = document.getElementById("login-password").value.trim();
-
-        if (!email || !password) {
-            showMsg("Bitte E-Mail und Passwort eingeben.", "warn");
+        if (!loginEmail.value || !loginPassword.value) {
+            showMsg("login", "Bitte E-Mail und Passwort eingeben.", "warn");
             return;
         }
 
@@ -261,29 +271,26 @@ document.addEventListener("DOMContentLoaded", () => {
             const res = await fetch(`${API_BASE}/api/login`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, password })
+                body: JSON.stringify({
+                    email: loginEmail.value.trim(),
+                    password: loginPassword.value.trim()
+                })
             });
 
             const data = await res.json();
-
-            if (!res.ok) {
-                showMsg(data.error || "Login fehlgeschlagen", "error");
-                return;
-            }
+            if (!res.ok) return showMsg("login", data.error, "error");
 
             currentUserId = data.id;
-            currentName   = data.name || (data.email && data.email.split("@")[0]) || "Gast";
-            currentEmail  = data.email;
-            stamps        = data.stamps || 0;
+            currentName = data.name || data.email.split("@")[0];
+            currentEmail = data.email;
+            stamps = data.stamps;
 
-            saveSession();
             updateStampCard();
-            showMsg("Login erfolgreich ✅", "ok");
+            showMsg("login", "Login erfolgreich ✅", "ok");
             showScreen("stampcard-screen");
 
-        } catch (err) {
-            console.error(err);
-            showMsg("Backend nicht erreichbar.", "error");
+        } catch {
+            showMsg("login", "Backend nicht erreichbar.", "error");
         } finally {
             setLoading(btnLogin, false);
         }
@@ -293,29 +300,18 @@ document.addEventListener("DOMContentLoaded", () => {
     // Scan
     // ==========================
     btnScan?.addEventListener("click", async () => {
-        if (!currentUserId) {
-            showMsg("Bitte zuerst einloggen.", "warn");
-            return;
-        }
-
         setLoading(btnScan, true, "Scanne...");
         try {
             const res = await fetch(`${API_BASE}/api/users/${currentUserId}/scan`, { method: "POST" });
             const data = await res.json();
-
-            if (!res.ok) {
-                showMsg(data.error || "Fehler beim Scannen", "error");
-                return;
-            }
+            if (!res.ok) return showMsg("stampcard", data.error, "error");
 
             stamps = data.stamps;
             updateStampCard();
-
             showScreen(stamps >= maxStamps ? "freecoffee-screen" : "stampadded-screen");
 
-        } catch (err) {
-            console.error(err);
-            showMsg("Backend nicht erreichbar.", "error");
+        } catch {
+            showMsg("stampcard", "Backend nicht erreichbar.", "error");
         } finally {
             setLoading(btnScan, false);
         }
@@ -326,29 +322,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Redeem
     btnFreeRedeem?.addEventListener("click", async () => {
-        if (!currentUserId) {
-            showMsg("Bitte zuerst einloggen.", "warn");
-            return;
-        }
-
         setLoading(btnFreeRedeem, true, "Löse ein...");
         try {
             const res = await fetch(`${API_BASE}/api/users/${currentUserId}/redeem`, { method: "POST" });
             const data = await res.json();
-
-            if (!res.ok) {
-                showMsg(data.error || "Fehler beim Einlösen", "error");
-                return;
-            }
+            if (!res.ok) return showMsg("freecoffee", data.error, "error");
 
             stamps = data.stamps;
             updateStampCard();
-            showMsg("Eingelöst ☕️", "ok");
+            showMsg("freecoffee", "Eingelöst ☕️", "ok");
             showScreen("stampcard-screen");
 
-        } catch (err) {
-            console.error(err);
-            showMsg("Backend nicht erreichbar.", "error");
+        } catch {
+            showMsg("freecoffee", "Backend nicht erreichbar.", "error");
         } finally {
             setLoading(btnFreeRedeem, false);
         }
@@ -358,52 +344,38 @@ document.addEventListener("DOMContentLoaded", () => {
     // Profil
     // ==========================
     btnOpenProfile?.addEventListener("click", () => {
-        if (!currentUserId) {
-            showMsg("Bitte zuerst einloggen.", "warn");
-            return;
-        }
-        if (profileNameInput) profileNameInput.value = currentName || "";
-        if (profileEmailInput) profileEmailInput.value = currentEmail || "";
-        if (profilePasswordInput) profilePasswordInput.value = "";
+        profileName.value = currentName;
+        profileEmail.value = currentEmail;
+        profilePassword.value = "";
         showScreen("profile-screen");
     });
 
     btnProfileBack?.addEventListener("click", async () => {
-        if (!currentUserId) {
-            showMsg("Bitte zuerst einloggen.", "warn");
-            return;
-        }
-
-        const name     = profileNameInput ? profileNameInput.value.trim() : "";
-        const email    = profileEmailInput ? profileEmailInput.value.trim() : "";
-        const password = profilePasswordInput ? profilePasswordInput.value.trim() : "";
-
         setLoading(btnProfileBack, true, "Speichere...");
         try {
             const res = await fetch(`${API_BASE}/api/users/${currentUserId}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ name, email, password })
+                body: JSON.stringify({
+                    name: profileName.value.trim(),
+                    email: profileEmail.value.trim(),
+                    password: profilePassword.value.trim()
+                })
             });
 
             const data = await res.json();
-            if (!res.ok) {
-                showMsg(data.error || "Fehler beim Profil-Update", "error");
-                return;
-            }
+            if (!res.ok) return showMsg("profile", data.error, "error");
 
-            currentName  = data.name;
+            currentName = data.name;
             currentEmail = data.email;
-            stamps       = data.stamps;
+            stamps = data.stamps;
 
-            saveSession();
             updateStampCard();
-            showMsg("Profil gespeichert ✅", "ok");
+            showMsg("profile", "Profil gespeichert ✅", "ok");
             showScreen("stampcard-screen");
 
-        } catch (err) {
-            console.error(err);
-            showMsg("Backend nicht erreichbar.", "error");
+        } catch {
+            showMsg("profile", "Backend nicht erreichbar.", "error");
         } finally {
             setLoading(btnProfileBack, false);
         }
@@ -417,16 +389,8 @@ document.addEventListener("DOMContentLoaded", () => {
         currentName = "";
         currentEmail = "";
         stamps = 0;
-
         clearSession();
-        updateStampCard();
-
-        const loginEmail = document.getElementById("login-email");
-        const loginPassword = document.getElementById("login-password");
-        if (loginEmail) loginEmail.value = "";
-        if (loginPassword) loginPassword.value = "";
-
-        showMsg("Ausgeloggt.", "info");
+        showMsg("login", "Ausgeloggt.", "info");
         showScreen("login-screen");
     });
 });

@@ -8,7 +8,7 @@
 
 <body>
 
-<div id="app-msg" style="display:none; padding:10px; margin:10px; border-radius:8px;"></div>
+
 <!-- Willkommen -->
 <section id="welcome-screen">
     <div class="card">
@@ -29,6 +29,8 @@
         <input class="input" type="email" id="login-email" placeholder="E-Mail-Adresse">
         <input class="input" type="password" id="login-password" placeholder="Passwort">
 
+        <div id="login-msg" class="app-msg" aria-live="polite"></div>
+
         <div class="button-row">
             <button class="secondary" id="btn-to-register">Registrieren</button>
             <button class="primary" id="btn-login">Login</button>
@@ -44,6 +46,8 @@
         <input class="input" type="text" id="reg-name" placeholder="Name">
         <input class="input" type="email" id="reg-email" placeholder="E-Mail-Adresse">
         <input class="input" type="password" id="reg-password" placeholder="Passwort">
+
+        <div id="register-msg" class="app-msg" aria-live="polite"></div>
 
         <div class="button-row">
             <button class="secondary" id="btn-register-back">Zurück</button>
@@ -78,6 +82,8 @@
             <p class="stamp-text" id="stamp-text">Noch 5 Kaffee bis gratis</p>
         </div>
 
+        <div id="stamp-msg" class="app-msg" aria-live="polite"></div>
+
         <button class="primary main-button" id="btn-scan">Karte scannen</button>
     </div>
 </section>
@@ -100,6 +106,9 @@
         <p class="subtitle text-center" id="freecoffee-text">
             Du hast 5 Stempel gesammelt.
         </p>
+
+        <div id="freecoffee-msg" class="app-msg" aria-live="polite"></div>
+
         <div class="button-row">
             <button class="secondary" id="btn-free-back">Zurück</button>
             <button class="primary" id="btn-free-redeem">Einlösen</button>
@@ -118,6 +127,8 @@
         <input class="input" id="profile-name" placeholder="Name">
         <input class="input" id="profile-email" placeholder="E-Mail">
         <input class="input" id="profile-password" placeholder="Passwort" type="password">
+
+        <div id="profile-msg" class="app-msg" aria-live="polite"></div>
 
         <button class="primary main-button" id="btn-profile-back">Zurück</button>
     </div>

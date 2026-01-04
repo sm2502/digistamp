@@ -278,6 +278,15 @@ button:active {
     box-shadow: none;
 }
 
+.app-msg{
+  display:none;
+  margin-top:12px;
+  padding:10px 14px;
+  border-radius:10px;
+  font-size:0.9rem;
+  text-align:center;
+}
+
 /* von ChatGpt */
 section {
   animation: fadeIn 0.4s ease;
