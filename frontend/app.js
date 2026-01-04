@@ -1,5 +1,4 @@
-// unterstützung von ChatGpt
-// Hilfsfunktion: nur einen Screen anzeigen
+// Hilfsfunktion: Screens
 function showScreen(id) {
     const screens = [
         "welcome-screen",
@@ -13,19 +12,24 @@ function showScreen(id) {
 
     screens.forEach(sid => {
         const el = document.getElementById(sid);
-        if (el) {
-            el.style.display = (sid === id) ? "block" : "none";
-        }
+        if (el) el.style.display = (sid === id) ? "block" : "none";
     });
 }
 
+
+// Backend
+const API_BASE = "http://localhost:3000";
+
+
 // App-State
+let currentUserId = null;
 let currentName = "";
 let currentEmail = "";
 let stamps = 0;
 const maxStamps = 5;
 
-// Stempelkarte aktualisieren
+
+// UI Update
 function updateStampCard() {
     const helloNameEl = document.getElementById("hello-name");
     const stampInfoEl = document.getElementById("stamp-text");
@@ -42,11 +46,10 @@ function updateStampCard() {
 
     const remaining = maxStamps - stamps;
     if (stampInfoEl) {
-        if (remaining > 0) {
-            stampInfoEl.textContent = `Noch ${remaining} Kaffee bis gratis`;
-        } else {
-            stampInfoEl.textContent = "Du hast einen Gratis Kaffee!";
-        }
+        stampInfoEl.textContent =
+            remaining > 0
+                ? `Noch ${remaining} Kaffee bis gratis`
+                : "Du hast einen Gratis Kaffee!";
     }
 
     if (freeCoffeeText) {
@@ -54,154 +57,170 @@ function updateStampCard() {
     }
 }
 
+
+// App Logik
 document.addEventListener("DOMContentLoaded", () => {
+
     // Buttons
-    const btnWelcomeNext   = document.getElementById("btn-welcome-next");
-    const btnToRegister    = document.getElementById("btn-to-register");
-    const btnLogin         = document.getElementById("btn-login");
-    const btnRegisterBack  = document.getElementById("btn-register-back");
-    const btnRegisterSave  = document.getElementById("btn-register-save");
-    const btnScan          = document.getElementById("btn-scan");
-    const btnStampNext     = document.getElementById("btn-stampadded-next");
-    const btnFreeBack      = document.getElementById("btn-free-back");
-    const btnFreeRedeem    = document.getElementById("btn-free-redeem");
-    const btnOpenProfile   = document.getElementById("btn-open-profile");
-    const btnProfileBack   = document.getElementById("btn-profile-back");
-    const btnLogout        = document.getElementById("btn-logout");
+    const btnWelcomeNext  = document.getElementById("btn-welcome-next");
+    const btnToRegister   = document.getElementById("btn-to-register");
+    const btnLogin        = document.getElementById("btn-login");
+    const btnRegisterBack = document.getElementById("btn-register-back");
+    const btnRegisterSave = document.getElementById("btn-register-save");
+    const btnScan         = document.getElementById("btn-scan");
+    const btnStampNext    = document.getElementById("btn-stampadded-next");
+    const btnFreeBack     = document.getElementById("btn-free-back");
+    const btnFreeRedeem   = document.getElementById("btn-free-redeem");
+    const btnOpenProfile  = document.getElementById("btn-open-profile");
+    const btnProfileBack  = document.getElementById("btn-profile-back");
+    const btnLogout       = document.getElementById("btn-logout");
 
-    // Profil-Inputs
-    const profileNameInput  = document.getElementById("profile-name");
-    const profileEmailInput = document.getElementById("profile-email");
+    // Profile Inputs
+    const profileNameInput     = document.getElementById("profile-name");
+    const profileEmailInput    = document.getElementById("profile-email");
+    const profilePasswordInput = document.getElementById("profile-password");
 
-    // Welcome -> Login
-    if (btnWelcomeNext) {
-        btnWelcomeNext.addEventListener("click", () => {
-            showScreen("login-screen");
-        });
-    }
+    // Welcome → Login
+    btnWelcomeNext?.addEventListener("click", () => {
+        showScreen("login-screen");
+    });
 
-    // Login -> Registrierung
-    if (btnToRegister) {
-        btnToRegister.addEventListener("click", () => {
-            showScreen("register-screen");
-        });
-    }
+    // Login → Register
+    btnToRegister?.addEventListener("click", () => {
+        showScreen("register-screen");
+    });
 
-    // Registrierung -> Zurück -> Login
-    if (btnRegisterBack) {
-        btnRegisterBack.addEventListener("click", () => {
-            showScreen("login-screen");
-        });
-    }
+    // Register → Back
+    btnRegisterBack?.addEventListener("click", () => {
+        showScreen("login-screen");
+    });
 
-    // Registrierung speichern -> Stempelkarte
-    if (btnRegisterSave) {
-        btnRegisterSave.addEventListener("click", () => {
-            const name = document.getElementById("reg-name").value.trim();
-            const email = document.getElementById("reg-email").value.trim();
 
-            currentName = name || "Gast";
-            currentEmail = email || "";
+    // Registrierung
+    btnRegisterSave?.addEventListener("click", async () => {
+        const name     = document.getElementById("reg-name").value.trim();
+        const email    = document.getElementById("reg-email").value.trim();
+        const password = document.getElementById("reg-password").value.trim();
 
-            stamps = 0;
-            updateStampCard();
-            showScreen("stampcard-screen");
-        });
-    }
+        try {
+            const res = await fetch(`${API_BASE}/api/register`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name, email, password })
+            });
 
-    // Login -> Stempelkarte
-    if (btnLogin) {
-        btnLogin.addEventListener("click", () => {
-            const email = document.getElementById("login-email").value.trim();
-            currentEmail = email;
-            // Name aus E-Mail ableiten, falls kein Profilname
-            currentName = currentName || ((email && email.includes("@")) ? email.split("@")[0] : "Gast");
+            const data = await res.json();
+            if (!res.ok) return alert(data.error);
+
+            currentUserId = data.id;
+            currentName   = data.name;
+            currentEmail  = data.email;
+            stamps        = data.stamps;
 
             updateStampCard();
             showScreen("stampcard-screen");
-        });
-    }
 
-    // Karte scannen -> Stempel erhöhen
-    if (btnScan) {
-        btnScan.addEventListener("click", () => {
-            stamps++;
-            if (stamps >= maxStamps) {
-                // genug Stempel -> Gratis Kaffee
-                updateStampCard();
-                showScreen("freecoffee-screen");
-            } else {
-                // sonst: 1 Stempel hinzugefügt
-                updateStampCard();
-                showScreen("stampadded-screen");
-            }
-        });
-    }
+        } catch {
+            alert("Backend nicht erreichbar");
+        }
+    });
 
-    // "1 Stempel hinzugefügt" -> zurück zur Stempelkarte
-    if (btnStampNext) {
-        btnStampNext.addEventListener("click", () => {
+    // Login
+    btnLogin?.addEventListener("click", async () => {
+        const email    = document.getElementById("login-email").value.trim();
+        const password = document.getElementById("login-password").value.trim();
+
+        try {
+            const res = await fetch(`${API_BASE}/api/login`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password })
+            });
+
+            const data = await res.json();
+            if (!res.ok) return alert(data.error);
+
+            currentUserId = data.id;
+            currentName   = data.name || data.email.split("@")[0];
+            currentEmail  = data.email;
+            stamps        = data.stamps;
+
             updateStampCard();
             showScreen("stampcard-screen");
-        });
-    }
 
-    // Gratis Kaffee -> Zurück
-    if (btnFreeBack) {
-        btnFreeBack.addEventListener("click", () => {
-            updateStampCard();
-            showScreen("stampcard-screen");
-        });
-    }
+        } catch {
+            alert("Backend nicht erreichbar");
+        }
+    });
 
-    // Gratis Kaffee einlösen -> Stempel auf 0
-    if (btnFreeRedeem) {
-        btnFreeRedeem.addEventListener("click", () => {
-            stamps = 0;
-            updateStampCard();
-            showScreen("stampcard-screen");
-        });
-    }
 
-    // Profil über drei Punkte öffnen
-    if (btnOpenProfile) {
-        btnOpenProfile.addEventListener("click", () => {
-            if (profileNameInput)  profileNameInput.value  = currentName || "";
-            if (profileEmailInput) profileEmailInput.value = currentEmail || "";
-            showScreen("profile-screen");
-        });
-    }
+    // Scan
+    btnScan?.addEventListener("click", async () => {
+        const res = await fetch(`${API_BASE}/api/users/${currentUserId}/scan`, { method: "POST" });
+        const data = await res.json();
 
-    // Profil -> Zurück (Änderungen übernehmen)
-    if (btnProfileBack) {
-        btnProfileBack.addEventListener("click", () => {
-            if (profileNameInput && profileNameInput.value.trim() !== "") {
-                currentName = profileNameInput.value.trim();
-            }
-            if (profileEmailInput && profileEmailInput.value.trim() !== "") {
-                currentEmail = profileEmailInput.value.trim();
-            }
-            updateStampCard();
-            showScreen("stampcard-screen");
+        stamps = data.stamps;
+        updateStampCard();
+
+        showScreen(stamps >= maxStamps ? "freecoffee-screen" : "stampadded-screen");
+    });
+
+    btnStampNext?.addEventListener("click", () => {
+        showScreen("stampcard-screen");
+    });
+
+    btnFreeBack?.addEventListener("click", () => {
+        showScreen("stampcard-screen");
+    });
+
+    btnFreeRedeem?.addEventListener("click", async () => {
+        const res = await fetch(`${API_BASE}/api/users/${currentUserId}/redeem`, { method: "POST" });
+        const data = await res.json();
+        stamps = data.stamps;
+        updateStampCard();
+        showScreen("stampcard-screen");
+    });
+
+
+    // Profil
+    btnOpenProfile?.addEventListener("click", () => {
+        profileNameInput.value  = currentName;
+        profileEmailInput.value = currentEmail;
+        profilePasswordInput.value = "";
+        showScreen("profile-screen");
+    });
+
+    btnProfileBack?.addEventListener("click", async () => {
+        const name     = profileNameInput.value.trim();
+        const email    = profileEmailInput.value.trim();
+        const password = profilePasswordInput.value.trim();
+
+        const res = await fetch(`${API_BASE}/api/users/${currentUserId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, email, password })
         });
-    }
+
+        const data = await res.json();
+        if (!res.ok) return alert(data.error);
+
+        currentName  = data.name;
+        currentEmail = data.email;
+        stamps       = data.stamps;
+
+        updateStampCard();
+        showScreen("stampcard-screen");
+    });
 
     // Logout
-    if (btnLogout) {
-        btnLogout.addEventListener("click", () => {
-            currentName = "";
-            currentEmail = "";
-            stamps = 0;
-            const loginEmail = document.getElementById("login-email");
-            const loginPassword = document.getElementById("login-password");
-            if (loginEmail) loginEmail.value = "";
-            if (loginPassword) loginPassword.value = "";
-            updateStampCard();
-            showScreen("login-screen");
-        });
-    }
+    btnLogout?.addEventListener("click", () => {
+        currentUserId = null;
+        currentName = "";
+        currentEmail = "";
+        stamps = 0;
+        showScreen("login-screen");
+    });
 
-    // Startzustand
     updateStampCard();
     showScreen("welcome-screen");
 });
