@@ -1,85 +1,100 @@
 const express = require('express');
 const cors = require('cors');
+const bcrypt = require('bcryptjs');
+
 const app = express();
 const db = require('./db');
 
 app.use(cors());
 app.use(express.json());
 
+const SALT_ROUNDS = 10;
+
 // Test-Route
 app.get('/', (req, res) => {
   res.send('DigiStamp Backend läuft!');
 });
 
+// Registrierung (PASSWORT HASHEN)
+app.post('/api/register', async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
 
-// Registrierung
-app.post('/api/register', (req, res) => {
-
-  const { name, email, password } = req.body;
-
-  if (!email || !password) {
-    return res.status(400).json({ error: 'E-Mail und Passwort sind erforderlich!' });
-  }
-
-  const regSql =
-    'INSERT INTO users (name, email, password, stamps) VALUES (?,?,?,0)';
-
-  db.run(regSql, [name || null, email, password], function (err) {
-
-    if (err) {
-      console.error(err);
-      if (err.code === 'SQLITE_CONSTRAINT') {
-        return res.status(400).json({ error: 'E-Mail ist bereits registriert!' });
-      }
-      return res.status(500).json({ error: 'Datenbankfehler bei der Registrierung!' });
+    if (!email || !password) {
+      return res.status(400).json({ error: 'E-Mail und Passwort sind erforderlich!' });
     }
 
-    res.status(201).json({
-      id: this.lastID,
-      name: name || '',
-      email,
-      stamps: 0
+    const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+
+    const regSql =
+      'INSERT INTO users (name, email, password, stamps) VALUES (?,?,?,0)';
+
+    db.run(regSql, [name || null, email, hashedPassword], function (err) {
+      if (err) {
+        console.error(err);
+        if (err.code === 'SQLITE_CONSTRAINT') {
+          return res.status(400).json({ error: 'E-Mail ist bereits registriert!' });
+        }
+        return res.status(500).json({ error: 'Datenbankfehler bei der Registrierung!' });
+      }
+
+      res.status(201).json({
+        id: this.lastID,
+        name: name || '',
+        email,
+        stamps: 0
+      });
     });
-
-  });
-
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Serverfehler bei der Registrierung!' });
+  }
 });
 
-
-
-// Login
+// Login (HASH VERGLEICHEN)
 app.post('/api/login', (req, res) => {
-
   const { email, password } = req.body;
 
   if (!email || !password) {
     return res.status(400).json({ error: 'E-Mail und Passwort sind erforderlich!' });
   }
 
+  // Passwort-Hash muss mit ausgewählt werden
   const loginSql =
-    'SELECT id, name, email, stamps FROM users WHERE email = ? AND password = ?';
+    'SELECT id, name, email, password, stamps FROM users WHERE email = ?';
 
-  db.get(loginSql, [email, password], (err, row) => {
+  db.get(loginSql, [email], async (err, row) => {
+    try {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ error: 'Datenbankfehler beim Login!' });
+      }
 
-    if (err) {
-      console.error(err);
-      return res.status(500).json({ error: 'Datenbankfehler beim Login!' });
+      if (!row) {
+        return res.status(401).json({ error: 'E-Mail oder Passwort falsch!' });
+      }
+
+      const ok = await bcrypt.compare(password, row.password);
+      if (!ok) {
+        return res.status(401).json({ error: 'E-Mail oder Passwort falsch!' });
+      }
+
+      // Passwort nicht zurückgeben
+      res.json({
+        id: row.id,
+        name: row.name,
+        email: row.email,
+        stamps: row.stamps
+      });
+    } catch (e) {
+      console.error(e);
+      return res.status(500).json({ error: 'Serverfehler beim Login!' });
     }
-
-    if (!row) {
-      return res.status(401).json({ error: 'E-Mail oder Passwort falsch!' });
-    }
-
-    res.json(row);
-
   });
-
 });
 
-
-//User-Daten holen
+// User-Daten holen
 app.get('/api/users/:id', (req, res) => {
-
   const { id } = req.params;
 
   db.get(
@@ -97,17 +112,13 @@ app.get('/api/users/:id', (req, res) => {
       res.json(row);
     }
   );
-
 });
 
-
-//Stempel hinzufügen
+// Stempel hinzufügen
 app.post('/api/users/:id/scan', (req, res) => {
-
   const { id } = req.params;
 
   db.get('SELECT stamps FROM users WHERE id = ?', [id], (err, row) => {
-
     if (err) {
       console.error(err);
       return res.status(500).json({ error: 'Fehler bei der Datenbank.' });
@@ -116,7 +127,6 @@ app.post('/api/users/:id/scan', (req, res) => {
       return res.status(404).json({ error: 'User nicht gefunden.' });
     }
 
-    //Maximale Stempelanzahl
     const maxStamps = 5;
     const newStamps = Math.min(row.stamps + 1, maxStamps);
 
@@ -132,15 +142,11 @@ app.post('/api/users/:id/scan', (req, res) => {
         res.json({ id: Number(id), stamps: newStamps });
       }
     );
-
   });
-
 });
 
-
-//Stempel einlösen (stempelcount auf 0 setzen)
+// Stempel einlösen
 app.post('/api/users/:id/redeem', (req, res) => {
-
   const { id } = req.params;
 
   db.run(
@@ -155,61 +161,61 @@ app.post('/api/users/:id/redeem', (req, res) => {
       res.json({ id: Number(id), stamps: 0 });
     }
   );
-
 });
 
-
-//Profil aktualisieren
+// Profil aktualisieren (Passwort nur hashen, wenn gesetzt)
 app.put('/api/users/:id', (req, res) => {
-
   const { id } = req.params;
   const { name, email, password } = req.body;
 
-  //Nutzer von Datenbnak holen
-  db.get('SELECT id, name, email, password, stamps FROM users WHERE id = ?', [id], (err, row) => {
-
-    if (err) {
-      console.error(err);
-      return res.status(500).json({ error: 'Fehler bei der Datenbank!' });
-    }
-
-    if (!row) {
-      return res.status(404).json({ error: 'User nicht gefunden!' });
-    }
-
-
-    const newName = (name && name.trim() !== '') ? name.trim() : row.name;
-    const newEmail = (email && email.trim() !== '') ? email.trim() : row.email;
-    const newPassword = (password && password.trim() !== '') ? password.trim() : row.password;
-
-    db.run(
-      'UPDATE users SET name = ?, email = ?, password = ? WHERE id = ?',
-      [newName, newEmail, newPassword, id],
-      function (err2) {
-        if (err2) {
-          console.error(err2);
-          if (err2.code === 'SQLITE_CONSTRAINT') {
-            return res.status(400).json({ error: 'E-Mail ist bereits vergeben!' });
-          }
-          return res.status(500).json({ error: 'Fehler bei Aktualisieren!' });
-        }
-
-        res.json({
-          id: Number(id),
-          name: newName,
-          email: newEmail,
-          stamps: row.stamps
-        });
-
+  db.get('SELECT id, name, email, password, stamps FROM users WHERE id = ?', [id], async (err, row) => {
+    try {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ error: 'Fehler bei der Datenbank!' });
       }
 
-    );
+      if (!row) {
+        return res.status(404).json({ error: 'User nicht gefunden!' });
+      }
 
+      const newName = (name && name.trim() !== '') ? name.trim() : row.name;
+      const newEmail = (email && email.trim() !== '') ? email.trim() : row.email;
+
+      // Default: altes Passwort-Hash behalten
+      let newPasswordHash = row.password;
+
+      // Wenn neues Passwort eingegeben wurde: hashen
+      if (password && password.trim() !== '') {
+        newPasswordHash = await bcrypt.hash(password.trim(), SALT_ROUNDS);
+      }
+
+      db.run(
+        'UPDATE users SET name = ?, email = ?, password = ? WHERE id = ?',
+        [newName, newEmail, newPasswordHash, id],
+        function (err2) {
+          if (err2) {
+            console.error(err2);
+            if (err2.code === 'SQLITE_CONSTRAINT') {
+              return res.status(400).json({ error: 'E-Mail ist bereits vergeben!' });
+            }
+            return res.status(500).json({ error: 'Fehler bei Aktualisieren!' });
+          }
+
+          res.json({
+            id: Number(id),
+            name: newName,
+            email: newEmail,
+            stamps: row.stamps
+          });
+        }
+      );
+    } catch (e) {
+      console.error(e);
+      return res.status(500).json({ error: 'Serverfehler beim Profil-Update!' });
+    }
   });
-
 });
-
-
 
 // Server starten
 const PORT = process.env.PORT || 3000;
