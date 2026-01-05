@@ -163,6 +163,22 @@ function updateStampCard() {
     }
 }
 
+// ✅ NEU: Text im "1 Stempel hinzugefügt" Screen aktualisieren
+function updateStampAddedText() {
+    const el = document.getElementById("stampadded-remaining");
+    if (!el) return;
+
+    const remaining = Math.max(0, maxStamps - stamps);
+
+    if (remaining <= 0) {
+        el.textContent = "Du hast genug Stempel für einen Gratis Kaffee!";
+    } else if (remaining === 1) {
+        el.textContent = "1 Stempel fehlt noch.";
+    } else {
+        el.textContent = `${remaining} Stempel fehlen noch.`;
+    }
+}
+
 // ==========================
 // App
 // ==========================
@@ -308,6 +324,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
             stamps = data.stamps;
             updateStampCard();
+            updateStampAddedText(); // ✅ NEU
+
             showScreen(stamps >= maxStamps ? "freecoffee-screen" : "stampadded-screen");
 
         } catch {

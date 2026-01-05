@@ -129,7 +129,7 @@ button:active {
     align-self: center;
     width: 80%;
     margin-top: auto;
-    front-weight: 600;
+    font-weight: 600;
 }
 
 .button-row {
