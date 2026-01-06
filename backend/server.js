@@ -10,6 +10,20 @@ app.use(express.json());
 
 const SALT_ROUNDS = 10;
 
+function isValidEmail(email) {
+  return typeof email === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+}
+
+function isValidId(id) {
+  const n = Number(id);
+  return Number.isInteger(n) && n > 0;
+}
+
+function sendValidation(res, errors) {
+  return res.status(400).json({ errors }); // errors: [{ field, message }]
+}
+
+
 // Test-Route
 app.get('/', (req, res) => {
   res.send('DigiStamp Backend läuft!');
@@ -20,28 +34,35 @@ app.post('/api/register', async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).json({ error: 'E-Mail und Passwort sind erforderlich!' });
+    const errors = [];
+    if (!email || !isValidEmail(email)) errors.push({ field: "email", message: "Bitte eine gültige E-Mail-Adresse eingeben." });
+    if (!password || String(password).trim().length < 6) errors.push({ field: "password", message: "Passwort muss mindestens 6 Zeichen haben." });
+
+    // name optional, aber wenn vorhanden: nicht nur Leerzeichen
+    if (name !== undefined && String(name).trim().length === 0) {
+      errors.push({ field: "name", message: "Name darf nicht leer sein." });
     }
 
-    const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+    if (errors.length) return sendValidation(res, errors);
+
+    const hashedPassword = await bcrypt.hash(String(password), SALT_ROUNDS);
 
     const regSql =
       'INSERT INTO users (name, email, password, stamps) VALUES (?,?,?,0)';
 
-    db.run(regSql, [name || null, email, hashedPassword], function (err) {
+    db.run(regSql, [name ? String(name).trim() : null, String(email).trim(), hashedPassword], function (err) {
       if (err) {
         console.error(err);
         if (err.code === 'SQLITE_CONSTRAINT') {
-          return res.status(400).json({ error: 'E-Mail ist bereits registriert!' });
+          return res.status(400).json({ errors: [{ field: "email", message: "E-Mail ist bereits registriert!" }] });
         }
         return res.status(500).json({ error: 'Datenbankfehler bei der Registrierung!' });
       }
 
       res.status(201).json({
         id: this.lastID,
-        name: name || '',
-        email,
+        name: name ? String(name).trim() : '',
+        email: String(email).trim(),
         stamps: 0
       });
     });
@@ -55,31 +76,30 @@ app.post('/api/register', async (req, res) => {
 app.post('/api/login', (req, res) => {
   const { email, password } = req.body;
 
-  if (!email || !password) {
-    return res.status(400).json({ error: 'E-Mail und Passwort sind erforderlich!' });
-  }
+  const errors = [];
+  if (!email || !isValidEmail(email)) errors.push({ field: "email", message: "Bitte eine gültige E-Mail-Adresse eingeben." });
+  if (!password) errors.push({ field: "password", message: "Bitte Passwort eingeben." });
+  if (errors.length) return sendValidation(res, errors);
 
-  // Passwort-Hash muss mit ausgewählt werden
   const loginSql =
     'SELECT id, name, email, password, stamps FROM users WHERE email = ?';
 
-  db.get(loginSql, [email], async (err, row) => {
+  db.get(loginSql, [String(email).trim()], async (err, row) => {
     try {
       if (err) {
         console.error(err);
         return res.status(500).json({ error: 'Datenbankfehler beim Login!' });
       }
-
       if (!row) {
+        // absichtlich generisch
         return res.status(401).json({ error: 'E-Mail oder Passwort falsch!' });
       }
 
-      const ok = await bcrypt.compare(password, row.password);
+      const ok = await bcrypt.compare(String(password), row.password);
       if (!ok) {
         return res.status(401).json({ error: 'E-Mail oder Passwort falsch!' });
       }
 
-      // Passwort nicht zurückgeben
       res.json({
         id: row.id,
         name: row.name,
@@ -93,9 +113,14 @@ app.post('/api/login', (req, res) => {
   });
 });
 
+
 // User-Daten holen
 app.get('/api/users/:id', (req, res) => {
   const { id } = req.params;
+
+  if (!isValidId(id)) {
+    return sendValidation(res, [{ field: "id", message: "Ungültige User-ID." }]);
+  }
 
   db.get(
     'SELECT id, name, email, stamps FROM users WHERE id = ?',
@@ -112,6 +137,64 @@ app.get('/api/users/:id', (req, res) => {
       res.json(row);
     }
   );
+});
+
+// User-Daten aktualisieren
+app.put('/api/users/:id', (req, res) => {
+  const { id } = req.params;
+  const { name, email, password } = req.body;
+
+  if (!isValidId(id)) return sendValidation(res, [{ field: "id", message: "Ungültige User-ID." }]);
+
+  const errors = [];
+  if (name !== undefined && String(name).trim().length === 0) errors.push({ field: "name", message: "Name darf nicht leer sein." });
+  if (email !== undefined && String(email).trim() !== "" && !isValidEmail(email)) errors.push({ field: "email", message: "Bitte eine gültige E-Mail-Adresse eingeben." });
+  if (password !== undefined && String(password).trim() !== "" && String(password).trim().length < 6) errors.push({ field: "password", message: "Passwort muss mindestens 6 Zeichen haben." });
+  if (errors.length) return sendValidation(res, errors);
+
+  db.get('SELECT id, name, email, password, stamps FROM users WHERE id = ?', [id], async (err, row) => {
+    try {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ error: 'Fehler bei der Datenbank!' });
+      }
+      if (!row) {
+        return res.status(404).json({ error: 'User nicht gefunden!' });
+      }
+
+      const newName = (name && String(name).trim() !== '') ? String(name).trim() : row.name;
+      const newEmail = (email && String(email).trim() !== '') ? String(email).trim() : row.email;
+
+      let newPasswordHash = row.password;
+      if (password && String(password).trim() !== '') {
+        newPasswordHash = await bcrypt.hash(String(password).trim(), SALT_ROUNDS);
+      }
+
+      db.run(
+        'UPDATE users SET name = ?, email = ?, password = ? WHERE id = ?',
+        [newName, newEmail, newPasswordHash, id],
+        function (err2) {
+          if (err2) {
+            console.error(err2);
+            if (err2.code === 'SQLITE_CONSTRAINT') {
+              return res.status(400).json({ errors: [{ field: "email", message: "E-Mail ist bereits vergeben!" }] });
+            }
+            return res.status(500).json({ error: 'Fehler bei Aktualisieren!' });
+          }
+
+          res.json({
+            id: Number(id),
+            name: newName,
+            email: newEmail,
+            stamps: row.stamps
+          });
+        }
+      );
+    } catch (e) {
+      console.error(e);
+      return res.status(500).json({ error: 'Serverfehler beim Profil-Update!' });
+    }
+  });
 });
 
 // Stempel hinzufügen
@@ -163,59 +246,7 @@ app.post('/api/users/:id/redeem', (req, res) => {
   );
 });
 
-// Profil aktualisieren (Passwort nur hashen, wenn gesetzt)
-app.put('/api/users/:id', (req, res) => {
-  const { id } = req.params;
-  const { name, email, password } = req.body;
 
-  db.get('SELECT id, name, email, password, stamps FROM users WHERE id = ?', [id], async (err, row) => {
-    try {
-      if (err) {
-        console.error(err);
-        return res.status(500).json({ error: 'Fehler bei der Datenbank!' });
-      }
-
-      if (!row) {
-        return res.status(404).json({ error: 'User nicht gefunden!' });
-      }
-
-      const newName = (name && name.trim() !== '') ? name.trim() : row.name;
-      const newEmail = (email && email.trim() !== '') ? email.trim() : row.email;
-
-      // Default: altes Passwort-Hash behalten
-      let newPasswordHash = row.password;
-
-      // Wenn neues Passwort eingegeben wurde: hashen
-      if (password && password.trim() !== '') {
-        newPasswordHash = await bcrypt.hash(password.trim(), SALT_ROUNDS);
-      }
-
-      db.run(
-        'UPDATE users SET name = ?, email = ?, password = ? WHERE id = ?',
-        [newName, newEmail, newPasswordHash, id],
-        function (err2) {
-          if (err2) {
-            console.error(err2);
-            if (err2.code === 'SQLITE_CONSTRAINT') {
-              return res.status(400).json({ error: 'E-Mail ist bereits vergeben!' });
-            }
-            return res.status(500).json({ error: 'Fehler bei Aktualisieren!' });
-          }
-
-          res.json({
-            id: Number(id),
-            name: newName,
-            email: newEmail,
-            stamps: row.stamps
-          });
-        }
-      );
-    } catch (e) {
-      console.error(e);
-      return res.status(500).json({ error: 'Serverfehler beim Profil-Update!' });
-    }
-  });
-});
 
 // Server starten
 const PORT = process.env.PORT || 3000;

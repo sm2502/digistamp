@@ -287,6 +287,11 @@ button:active {
   text-align:center;
 }
 
+.input-error{
+  outline: 2px solid #ef4444;
+}
+
+
 /* von ChatGpt */
 section {
   animation: fadeIn 0.4s ease;
