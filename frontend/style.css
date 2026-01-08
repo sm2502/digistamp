@@ -166,26 +166,26 @@ button:active {
 }
 
 /* Willkommen Screen */
-
 #welcome-screen .card {
     display: flex;
     flex-direction: column;
     justify-content: center;
     text-align: center;
-    padding-top: 120px;
+    padding-top: 100px;
     padding-bottom: 20px;
 }
 
 #welcome-screen .subtitle {
-    max-width: 240px;
+  text-align: center;
+  max-width: 260px;
+  margin: 0 auto;
 }
 
 /* Login & Registrierung */
-
 #login-screen .card,
 #register-screen .card {
     justify-content: center;
-    gap: 20px;
+    gap: 100px;
 }
 
 /* Top-Bar */
@@ -269,8 +269,8 @@ button:active {
 
 
 .coffee-icon {
-    width: 90px;
-    height: 90px;
+    width: 150px;
+    height: 150px;
     display: block;
     margin: 0 auto 30px;
     object-fit: contain;
