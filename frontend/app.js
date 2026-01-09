@@ -1,5 +1,4 @@
 // Screens
-
 function showScreen(id) {
     const screens = [
         "welcome-screen",
@@ -394,7 +393,14 @@ document.addEventListener("DOMContentLoaded", () => {
             showScreen(stamps >= maxStamps ? "freecoffee-screen" : "stampadded-screen");
         } catch (err) {
             console.error(err);
-            showMsg("stampcard", "Backend nicht erreichbar.", "error");
+
+            stamps = Math.min(stamps + 1, maxStamps);
+                updateStampCard();
+                updateStampAddedText();
+
+                showMsg("stampcard", "Offline-Modus: Stempel lokal gespeichert.", "warn");
+                showScreen(stamps >= maxStamps ? "freecoffee-screen" : "stampadded-screen");
+            }
         } finally {
             setLoading(btnScan, false);
         }
@@ -411,6 +417,10 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
+        if (!confirm("Möchtest du deinen Gratis Kaffee wirklich einlösen?")) {
+            return;
+        }
+
         setLoading(btnFreeRedeem, true, "Löse ein...");
         try {
             const res = await fetch(`${API_BASE}/api/users/${currentUserId}/redeem`, { method: "POST" });
@@ -424,7 +434,11 @@ document.addEventListener("DOMContentLoaded", () => {
             showScreen("stampcard-screen");
         } catch (err) {
             console.error(err);
-            showMsg("freecoffee", "Backend nicht erreichbar.", "error");
+
+            stamps = 0;
+            updateStampCard();
+            showMsg("freecoffee", "Offline-Modus: Einlösen lokal gespeichert.", "warn");
+            showScreen("stampcard-screen");
         } finally {
             setLoading(btnFreeRedeem, false);
         }
