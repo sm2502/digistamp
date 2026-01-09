@@ -1,6 +1,5 @@
-// ==========================
 // Screens
-// ==========================
+
 function showScreen(id) {
     const screens = [
         "welcome-screen",
@@ -18,14 +17,12 @@ function showScreen(id) {
     });
 }
 
-// ==========================
+
 // Backend
-// ==========================
 const API_BASE = "http://localhost:3000";
 
-// ==========================
-// localStorage helpers
-// ==========================
+
+// localStorage
 const LS_KEY = "digistamp_session_v1";
 
 function saveSession() {
@@ -58,9 +55,9 @@ function loadSession() {
     }
 }
 
-// ==========================
-// UX helpers (screen-based messages)
-// ==========================
+
+// UX nachrichten
+
 function getMsgBox(screen) {
     const map = {
         login: "login-msg",
@@ -120,9 +117,8 @@ function setLoading(btn, isLoading, text = "Bitte warten...") {
     }
 }
 
-// ==========================
-// Backend error helpers (A)
-// ==========================
+
+// Backend error 
 function getFirstApiError(data) {
     if (data && Array.isArray(data.errors) && data.errors.length > 0) {
         return data.errors[0]; // { field, message }
@@ -147,18 +143,16 @@ function markFieldError(field) {
     });
 }
 
-// ==========================
+
 // App-State
-// ==========================
 let currentUserId = null;
 let currentName = "";
 let currentEmail = "";
 let stamps = 0;
 const maxStamps = 5;
 
-// ==========================
+
 // UI Update
-// ==========================
 function updateStampCard() {
     const helloNameEl = document.getElementById("hello-name");
     const stampTextEl = document.getElementById("stamp-text");
@@ -202,9 +196,8 @@ function updateStampAddedText() {
     }
 }
 
-// ==========================
+
 // App
-// ==========================
 document.addEventListener("DOMContentLoaded", () => {
     const $ = (id) => document.getElementById(id);
 
@@ -249,9 +242,9 @@ document.addEventListener("DOMContentLoaded", () => {
     btnToRegister?.addEventListener("click", () => { clearFieldErrors(); showScreen("register-screen"); });
     btnRegisterBack?.addEventListener("click", () => { clearFieldErrors(); showScreen("login-screen"); });
 
-    // ==========================
-    // B) Auto-login + Session-Validierung gegen Backend
-    // ==========================
+  
+    // Auto-login + Session-Validierung
+    
     (async () => {
         if (!loadSession()) {
             showScreen("welcome-screen");
@@ -281,16 +274,16 @@ document.addEventListener("DOMContentLoaded", () => {
             showMsg("login", `Willkommen zurück, ${currentName || "Gast"}!`, "ok");
             showScreen("stampcard-screen");
         } catch {
-            // Backend down: zeig trotzdem App an, aber Hinweis
+            // Backend down
             updateStampCard();
             showMsg("login", "Backend gerade nicht erreichbar – Offline-Ansicht.", "warn");
             showScreen("stampcard-screen");
         }
     })();
 
-    // ==========================
+    
     // Registrierung
-    // ==========================
+    
     btnRegisterSave?.addEventListener("click", async () => {
         clearFieldErrors();
 
@@ -323,7 +316,7 @@ document.addEventListener("DOMContentLoaded", () => {
             stamps = data.stamps || 0;
 
             updateStampCard();
-            showMsg("register", "Registrierung erfolgreich 🎉", "ok");
+            showMsg("register", "Registrierung erfolgreich!", "ok");
             showScreen("stampcard-screen");
         } catch (err) {
             console.error(err);
@@ -333,9 +326,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // ==========================
+    
     // Login
-    // ==========================
+    
     btnLogin?.addEventListener("click", async () => {
         clearFieldErrors();
 
@@ -358,7 +351,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     markFieldError(first.field);
                     return showMsg("login", first.message, "error");
                 }
-                // Login-Fehler ist oft {error:"..."} absichtlich generisch
+                // Login-Fehler
                 return showMsg("login", data.error || "Login fehlgeschlagen", "error");
             }
 
@@ -368,7 +361,7 @@ document.addEventListener("DOMContentLoaded", () => {
             stamps = data.stamps || 0;
 
             updateStampCard();
-            showMsg("login", "Login erfolgreich ✅", "ok");
+            showMsg("login", "Login erfolgreich", "ok");
             showScreen("stampcard-screen");
         } catch (err) {
             console.error(err);
@@ -378,9 +371,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // ==========================
+    
     // Scan
-    // ==========================
     btnScan?.addEventListener("click", async () => {
         if (!currentUserId) {
             showMsg("stampcard", "Bitte zuerst einloggen.", "warn");
@@ -428,7 +420,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             stamps = data.stamps;
             updateStampCard();
-            showMsg("freecoffee", "Eingelöst ☕️", "ok");
+            showMsg("freecoffee", "Eingelöst", "ok");
             showScreen("stampcard-screen");
         } catch (err) {
             console.error(err);
@@ -438,9 +430,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // ==========================
+    
     // Profil
-    // ==========================
     btnOpenProfile?.addEventListener("click", () => {
         if (!currentUserId) {
             showMsg("stampcard", "Bitte zuerst einloggen.", "warn");
@@ -492,7 +483,7 @@ document.addEventListener("DOMContentLoaded", () => {
             stamps = data.stamps || stamps;
 
             updateStampCard();
-            showMsg("profile", "Profil gespeichert ✅", "ok");
+            showMsg("profile", "Profil gespeichert", "ok");
             showScreen("stampcard-screen");
         } catch (err) {
             console.error(err);
@@ -502,9 +493,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // ==========================
+
     // Logout
-    // ==========================
     btnLogout?.addEventListener("click", () => {
         currentUserId = null;
         currentName = "";
