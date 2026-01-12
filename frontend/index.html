@@ -8,7 +8,6 @@
 
 <body>
 
-
 <!-- Willkommen -->
 <section id="welcome-screen">
     <div class="card">
@@ -60,7 +59,8 @@
 <section id="stampcard-screen" style="display:none;">
     <div class="card">
         <div class="top-bar">
-            <span id="hello-name">Hallo Gast</span>
+            <!-- geändert: avatar + name -->
+            <span id="hello-name"><span id="hello-avatar">☕</span> Hallo Gast</span>
             <button class="icon-button" id="btn-open-profile">⋯</button>
         </div>
 
@@ -127,6 +127,25 @@
         <input class="input" id="profile-name" placeholder="Name">
         <input class="input" id="profile-email" placeholder="E-Mail">
         <input class="input" id="profile-password" placeholder="Passwort" type="password">
+
+        <!-- NEU: Profil-Personalisierung -->
+        <hr style="margin:16px 0; opacity:.2;">
+
+        <label class="label">Nickname</label>
+        <input class="input" id="profile-nickname" placeholder="z.B. Elli">
+
+        <label class="label">Lieblingskaffee</label>
+        <select class="input" id="profile-favcoffee">
+            <option value="">Bitte auswählen…</option>
+            <option value="Espresso">Espresso</option>
+            <option value="Cappuccino">Cappuccino</option>
+            <option value="Latte">Latte</option>
+            <option value="Americano">Americano</option>
+            <option value="Flat White">Flat White</option>
+        </select>
+
+        <p style="margin:10px 0 6px;">Avatar wählen</p>
+        <div id="avatarGrid" class="avatar-grid"></div>
 
         <div id="profile-msg" class="app-msg" aria-live="polite"></div>
 

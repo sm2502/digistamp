@@ -55,8 +55,61 @@ function loadSession() {
 }
 
 
-// UX nachrichten
+// ---- Profil-Erweiterung (localStorage pro User) ----
+const PROFILE_META_KEY = "digistamp_profile_meta_v1";
+const AVATARS = ["☕","😺","🐶","🦊","🐼","🐸","🐵","🦁","🐯","🐰","🍩","🌿","⭐","🔥","🎉"];
 
+function loadProfileMeta() {
+    try {
+        const raw = localStorage.getItem(PROFILE_META_KEY);
+        return raw ? JSON.parse(raw) : {};
+    } catch {
+        return {};
+    }
+}
+
+function saveProfileMeta(all) {
+    localStorage.setItem(PROFILE_META_KEY, JSON.stringify(all));
+}
+
+function getUserMeta() {
+    if (!currentUserId) return { nickname: "", favCoffee: "", avatar: "☕" };
+    const all = loadProfileMeta();
+    return all[currentUserId] || { nickname: "", favCoffee: "", avatar: "☕" };
+}
+
+function setUserMeta(meta) {
+    if (!currentUserId) return;
+    const all = loadProfileMeta();
+    all[currentUserId] = meta;
+    saveProfileMeta(all);
+}
+
+function renderAvatarGrid(selectedAvatar) {
+    const grid = document.getElementById("avatarGrid");
+    if (!grid) return;
+
+    grid.innerHTML = "";
+    AVATARS.forEach(a => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "avatar-btn" + (a === selectedAvatar ? " selected" : "");
+        btn.textContent = a;
+
+        btn.addEventListener("click", () => {
+            grid.querySelectorAll(".avatar-btn").forEach(b => b.classList.remove("selected"));
+            btn.classList.add("selected");
+            grid.dataset.selectedAvatar = a;
+        });
+
+        grid.appendChild(btn);
+    });
+
+    grid.dataset.selectedAvatar = selectedAvatar || "☕";
+}
+
+
+// UX nachrichten
 function getMsgBox(screen) {
     const map = {
         login: "login-msg",
@@ -117,7 +170,7 @@ function setLoading(btn, isLoading, text = "Bitte warten...") {
 }
 
 
-// Backend error 
+// Backend error
 function getFirstApiError(data) {
     if (data && Array.isArray(data.errors) && data.errors.length > 0) {
         return data.errors[0]; // { field, message }
@@ -158,8 +211,16 @@ function updateStampCard() {
     const freeCoffeeText = document.getElementById("freecoffee-text");
     const circles = document.querySelectorAll(".stamp-circle");
 
+    // NEU: Avatar + Nickname
+    const meta = getUserMeta();
+    const displayName = (meta.nickname && meta.nickname.trim()) ? meta.nickname.trim() : (currentName || "Gast");
+
+    const helloAvatarEl = document.getElementById("hello-avatar");
+    if (helloAvatarEl) helloAvatarEl.textContent = meta.avatar || "☕";
+
     if (helloNameEl) {
-        helloNameEl.textContent = "Hallo " + (currentName || "Gast");
+        // Wenn innerHTML schon Avatar enthält, Text sauber setzen:
+        helloNameEl.innerHTML = `<span id="hello-avatar">${meta.avatar || "☕"}</span> Hallo ${displayName}`;
     }
 
     circles.forEach((circle, index) => {
@@ -224,6 +285,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const profileEmail = $("profile-email");
     const profilePassword = $("profile-password");
 
+    // NEU: Profil-Inputs
+    const profileNickname = $("profile-nickname");
+    const profileFavCoffee = $("profile-favcoffee");
+
     // Auto-hide messages + clear field highlights while typing
     loginEmail?.addEventListener("input", () => { hideMsg("login"); clearFieldErrors(); });
     loginPassword?.addEventListener("input", () => { hideMsg("login"); clearFieldErrors(); });
@@ -236,14 +301,17 @@ document.addEventListener("DOMContentLoaded", () => {
     profileEmail?.addEventListener("input", () => { hideMsg("profile"); clearFieldErrors(); });
     profilePassword?.addEventListener("input", () => { hideMsg("profile"); clearFieldErrors(); });
 
+    // optional
+    profileNickname?.addEventListener("input", () => { hideMsg("profile"); });
+    profileFavCoffee?.addEventListener("change", () => { hideMsg("profile"); });
+
     // Navigation
     btnWelcomeNext?.addEventListener("click", () => showScreen("login-screen"));
     btnToRegister?.addEventListener("click", () => { clearFieldErrors(); showScreen("register-screen"); });
     btnRegisterBack?.addEventListener("click", () => { clearFieldErrors(); showScreen("login-screen"); });
 
-  
+
     // Auto-login + Session-Validierung
-    
     (async () => {
         if (!loadSession()) {
             showScreen("welcome-screen");
@@ -280,9 +348,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     })();
 
-    
+
     // Registrierung
-    
     btnRegisterSave?.addEventListener("click", async () => {
         clearFieldErrors();
 
@@ -325,9 +392,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    
+
     // Login
-    
     btnLogin?.addEventListener("click", async () => {
         clearFieldErrors();
 
@@ -350,7 +416,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     markFieldError(first.field);
                     return showMsg("login", first.message, "error");
                 }
-                // Login-Fehler
                 return showMsg("login", data.error || "Login fehlgeschlagen", "error");
             }
 
@@ -370,8 +435,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    
-    // Scan
+
+    // Scan (FIXED: Klammern)
     btnScan?.addEventListener("click", async () => {
         if (!currentUserId) {
             showMsg("stampcard", "Bitte zuerst einloggen.", "warn");
@@ -395,12 +460,11 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error(err);
 
             stamps = Math.min(stamps + 1, maxStamps);
-                updateStampCard();
-                updateStampAddedText();
+            updateStampCard();
+            updateStampAddedText();
 
-                showMsg("stampcard", "Offline-Modus: Stempel lokal gespeichert.", "warn");
-                showScreen(stamps >= maxStamps ? "freecoffee-screen" : "stampadded-screen");
-            }
+            showMsg("stampcard", "Offline-Modus: Stempel lokal gespeichert.", "warn");
+            showScreen(stamps >= maxStamps ? "freecoffee-screen" : "stampadded-screen");
         } finally {
             setLoading(btnScan, false);
         }
@@ -444,8 +508,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    
-    // Profil
+
+    // Profil öffnen
     btnOpenProfile?.addEventListener("click", () => {
         if (!currentUserId) {
             showMsg("stampcard", "Bitte zuerst einloggen.", "warn");
@@ -457,9 +521,17 @@ document.addEventListener("DOMContentLoaded", () => {
         profileName.value = currentName || "";
         profileEmail.value = currentEmail || "";
         profilePassword.value = "";
+
+        // NEU: Meta laden
+        const meta = getUserMeta();
+        if (profileNickname) profileNickname.value = meta.nickname || "";
+        if (profileFavCoffee) profileFavCoffee.value = meta.favCoffee || "";
+        renderAvatarGrid(meta.avatar || "☕");
+
         showScreen("profile-screen");
     });
 
+    // Profil speichern (Backend + Meta lokal)
     btnProfileBack?.addEventListener("click", async () => {
         if (!currentUserId) {
             showMsg("profile", "Bitte zuerst einloggen.", "warn");
@@ -495,6 +567,14 @@ document.addEventListener("DOMContentLoaded", () => {
             currentName = data.name || "";
             currentEmail = data.email || "";
             stamps = data.stamps || stamps;
+
+            // NEU: Meta lokal speichern
+            const newMeta = {
+                nickname: profileNickname?.value.trim() || "",
+                favCoffee: profileFavCoffee?.value || "",
+                avatar: document.getElementById("avatarGrid")?.dataset.selectedAvatar || getUserMeta().avatar || "☕"
+            };
+            setUserMeta(newMeta);
 
             updateStampCard();
             showMsg("profile", "Profil gespeichert", "ok");
