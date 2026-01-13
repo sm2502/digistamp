@@ -1,12 +1,16 @@
 const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
+const path = require("path");
+
 
 const app = express();
 const db = require('./db');
 
 app.use(cors());
 app.use(express.json());
+app.use(express.static(path.join(__dirname, "../frontend")));
+
 
 const SALT_ROUNDS = 10;
 
@@ -25,9 +29,9 @@ function sendValidation(res, errors) {
 
 
 // Test-Route
-app.get('/', (req, res) => {
-  res.send('DigiStamp Backend läuft!');
-});
+//app.get('/', (req, res) => {
+  //res.send('DigiStamp Backend läuft!');
+//});
 
 // Registrierung (PASSWORT HASHEN)
 app.post('/api/register', async (req, res) => {
@@ -245,6 +249,43 @@ app.post('/api/users/:id/redeem', (req, res) => {
     }
   );
 });
+
+// NFC/Link-Route (iPhone/Android): öffnet URL und gibt Stempel
+app.get("/stamp", (req, res) => {
+  const id = req.query.id;
+
+  if (!isValidId(id)) {
+    return res.status(400).send("Ungültige oder fehlende User-ID.");
+  }
+
+  db.get("SELECT stamps FROM users WHERE id = ?", [id], (err, row) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send("Datenbankfehler.");
+    }
+    if (!row) {
+      return res.status(404).send("User nicht gefunden.");
+    }
+
+    const maxStamps = 5;
+    const newStamps = Math.min(row.stamps + 1, maxStamps);
+
+    db.run("UPDATE users SET stamps = ? WHERE id = ?", [newStamps, id], (err2) => {
+      if (err2) {
+        console.error(err2);
+        return res.status(500).send("Fehler beim Aktualisieren der Stempel.");
+      }
+
+      res.send(`
+        <h1>Stempel erhalten!</h1>
+        <p>User: ${Number(id)}</p>
+        <p>Stempelstand: ${newStamps}/${maxStamps}</p>
+        <p>Du kannst dieses Fenster jetzt schließen.</p>
+      `);
+    });
+  });
+});
+
 
 
 
