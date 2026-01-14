@@ -35,6 +35,11 @@ section {
 
 /* Karte innen */
 
+#stampcard-screen .card {
+  justify-content: flex-start;
+}
+
+
 .card {
     width: min(92vw, 420px);
     padding: 32px;
@@ -74,6 +79,8 @@ section {
 }
 
 .card-header {
+    justify-content: space-between;
+
     width: 48px;
     height: 48px;
     padding: 12px 16px;
@@ -147,6 +154,12 @@ button:active {
     font-weight: 600;
 }
 
+#stampcard-screen .main-button {
+  margin-top: auto;
+  margin-bottom: 8px;
+}
+
+
 .button-row {
     margin-top: auto;
     display: flex;
@@ -210,6 +223,7 @@ button:active {
     justify-content: space-between;
     align-items: center;
     font-size: 14px;
+    width: 100%;
 }
 
 /* Stempelkarte */
@@ -219,6 +233,9 @@ button:active {
     border-radius: 22px;
     background: rgba(255,255,255,0.45);
     border: 2px solid #000000;
+    width: 100%;
+    max-width: 360%;
+    margin: 24px auto 0;
 }
 
 .stampcard-title {
@@ -332,6 +349,10 @@ section {
   animation: fadeIn 0.4s ease;
 }
 
+#btn-scan{
+    margin-top: 24px;
+}
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -342,6 +363,6 @@ section {
 @media (max-width: 420px) {
     .card {
         padding: 20px 14px;
-        align-items: flex-start;
+        align-items: stretch;
     }
   }
