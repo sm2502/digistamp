@@ -18,7 +18,7 @@ function showScreen(id) {
 
 
 // Backend
-const API_BASE = "http://localhost:3000";
+const API_BASE = "";
 
 // localStorage
 const LS_KEY = "digistamp_session_v1";
