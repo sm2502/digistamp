@@ -57,7 +57,7 @@ section {
     font-size: 28px;
     font-weight: 600;
     text-align: center;
-    margin: 0;
+    margin-bottom: 12px;
     color: #FFFFFF;
 }
 
@@ -93,11 +93,13 @@ section {
 
 /* Inputs */
 
+
+
 .input {
     width: 100%;
     padding: 14px 16px;
     border-radius: 18px;
-    border: 2px solid #000000;
+    border: 2px solid #b97a2a;
     font-size: 15px;
     box-sizing: border-box;
     outline: none;
@@ -107,7 +109,7 @@ section {
 
 .input:focus {
     border-color: #C28F5A;
-    box-shadow: 0 0 0 2px rgba(194, 143, 90, 0.18);
+    box-shadow: 0 0 0 2px rgba(194, 143, 90, 0.39);
 }
 
 /* Buttons */
@@ -212,8 +214,9 @@ button:active {
 /* Login & Registrierung */
 #login-screen .card,
 #register-screen .card {
-    justify-content: center;
-    gap: 100px;
+    justify-content: flex-start;
+    gap: 46px;
+    min-height: 630px;
 }
 
 /* Top-Bar */
