@@ -37,6 +37,7 @@ section {
 
 #stampcard-screen .card {
   justify-content: flex-start;
+  min-height: 600px;
 }
 
 
@@ -51,6 +52,7 @@ section {
     display: flex;
     flex-direction: column;
     gap: 22px;
+    min-height: 600px;
 }
 
 .title {
@@ -216,29 +218,32 @@ button:active {
 #register-screen .card {
     justify-content: flex-start;
     gap: 46px;
-    min-height: 630px;
+    min-height: 600px;
 }
 
 /* Top-Bar */
 .top-bar {
-    color: #FFFFFF;
+    color: #FFFFFFE5;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 14px;
+    font-size: 15px;
+    font-weight: bold;
     width: 100%;
 }
 
 /* Stempelkarte */
 .stampcard-box {
-    margin-top: 10px;
-    padding: 20px;
+    padding-top: 20px;
+    padding-bottom: 10px;
     border-radius: 22px;
     background: rgba(255,255,255,0.45);
-    border: 2px solid #000000;
+    border: 1px solid #000000;
     width: 100%;
     max-width: 360%;
     margin: 24px auto 0;
+    display: grid;
+    justify-content: center;
 }
 
 .stampcard-title {
@@ -280,7 +285,7 @@ button:active {
 .stamp-text {
     font-size: 12px;
     text-align: center;
-    margin: 0;
+    margin: 10px;
     color: rgba(43,30,22,0.85);
 }
 
