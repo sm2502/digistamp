@@ -239,6 +239,15 @@ function updateStampCard() {
     }
 
     if (currentUserId) saveSession();
+
+    const redeemBtn = document.getElementById("btn-redeem-direct");
+    if (redeemBtn) {
+        redeemBtn.style.display = (stamps >= maxStamps) ? "block" : "none";
+    }
+    const scanBtn = document.getElementById("btn-scan");
+    if (scanBtn) {
+        scanBtn.style.display = (stamps >= maxStamps) ? "none" : "block";
+    }
 }
 
 function updateStampAddedText() {
@@ -329,6 +338,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnOpenProfile = $("btn-open-profile");
     const btnProfileBack = $("btn-profile-back");
     const btnLogout = $("btn-logout");
+    const btnRedeemDirect = document.getElementById("btn-redeem-direct");
 
     // Inputs
     const loginEmail = $("login-email");
@@ -571,6 +581,41 @@ document.addEventListener("DOMContentLoaded", () => {
             showScreen("stampcard-screen");
         } finally {
             setLoading(btnFreeRedeem, false);
+        }
+    });
+
+    btnRedeemDirect?.addEventListener("click", async () => {
+        if (!currentUserId) {
+            showMsg("stampcard", "Bitte zuerst einloggen.", "warn");
+            showScreen("login-screen");
+            return;
+        }
+
+        if (!confirm("Möchtest du deinen Gratis Kaffee wirklich einlösen?")) {
+            return;
+        }
+
+        setLoading(btnRedeemDirect, true, "Löse ein...");
+        try {
+            const res = await fetch(`${API_BASE}/api/users/${currentUserId}/redeem`, {
+                method: "POST"
+            });
+            const data = await res.json();
+
+            if (!res.ok) {
+                showMsg("stampcard", data.error || "Fehler beim Einlösen", "error");
+                return;
+            }
+
+            stamps = data.stamps; // = 0
+            updateStampCard();
+
+            showMsg("stampcard", "☕ Gratis Kaffee eingelöst!", "ok");
+        } catch (err) {
+            console.error(err);
+            showMsg("stampcard", "Backend nicht erreichbar.", "error");
+        } finally {
+            setLoading(btnRedeemDirect, false);
         }
     });
 
