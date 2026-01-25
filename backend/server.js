@@ -250,7 +250,8 @@ app.post('/api/users/:id/redeem', (req, res) => {
   );
 });
 
-// NFC/Link-Route (iPhone/Android): öffnet URL und gibt Stempel
+// NFC/Link-Route (iPhone/Android): öffnet URL und gibt Stempel 
+/*
 app.get("/stamp", (req, res) => {
   const id = req.query.id;
 
@@ -286,7 +287,7 @@ app.get("/stamp", (req, res) => {
   });
 });
 
-
+*/
 
 
 // Server starten

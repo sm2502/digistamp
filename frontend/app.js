@@ -56,7 +56,7 @@ function loadSession() {
 
 // ---- Profil-Erweiterung (localStorage pro User) ----
 const PROFILE_META_KEY = "digistamp_profile_meta_v1";
-const AVATARS = ["☕","😺","🐶","🦊","🐼","🐸","🐵","🦁","🐯","🐰","🍩","🌿","⭐","🔥","🎉"];
+const AVATARS = ["☕", "😺", "🐶", "🦊", "🐼", "🐸", "🐵", "🦁", "🐯", "🐰", "🍩", "🌿", "⭐", "🔥", "🎉"];
 
 function loadProfileMeta() {
     try {
@@ -136,9 +136,9 @@ function showMsg(screen, text, type = "info") {
     box.textContent = text;
 
     const styles = {
-        info:  { background: "#eef2ff", border: "1px solid #c7d2fe", color: "#1e1b4b" },
-        ok:    { background: "#ecfdf5", border: "1px solid #a7f3d0", color: "#064e3b" },
-        warn:  { background: "#fffbeb", border: "1px solid #fcd34d", color: "#78350f" },
+        info: { background: "#eef2ff", border: "1px solid #c7d2fe", color: "#1e1b4b" },
+        ok: { background: "#ecfdf5", border: "1px solid #a7f3d0", color: "#064e3b" },
+        warn: { background: "#fffbeb", border: "1px solid #fcd34d", color: "#78350f" },
         error: { background: "#fef2f2", border: "1px solid #fecaca", color: "#7f1d1d" }
     };
 
@@ -260,19 +260,75 @@ function updateStampAddedText() {
 document.addEventListener("DOMContentLoaded", () => {
     const $ = (id) => document.getElementById(id);
 
+    // von stamp.html zurückkommen (vor Buttons!)
+    const params = new URLSearchParams(window.location.search);
+    const cameFromScan = params.get("stamped") === "1";
+
+    if (cameFromScan) {
+        // URL wieder clean machen
+        history.replaceState({}, "", "/index.html");
+
+        // Session DIREKT aus localStorage lesen (weil currentUserId hier noch null ist)
+        try {
+            const raw = localStorage.getItem(LS_KEY);
+            const sess = raw ? JSON.parse(raw) : null;
+            const uid = sess?.currentUserId;
+
+            if (!uid) {
+                showScreen("login-screen");
+                showMsg("login", "Bitte einloggen, um den Stempel zu sehen.", "warn");
+            } else {
+                // direkt aktuellen Stand vom Backend holen
+                fetch(`${API_BASE}/api/users/${uid}`)
+                    .then(r => r.ok ? r.json() : null)
+                    .then(data => {
+                        if (data) {
+                            currentUserId = data.id;
+                            currentName = data.name || "";
+                            currentEmail = data.email || "";
+                            stamps = data.stamps || 0;
+
+                            updateStampCard();
+                            updateStampAddedText();
+
+                            showMsg("stampcard", "Stempel hinzugefügt!", "ok");
+                            showScreen("stampcard-screen");
+                        } else {
+                            showScreen("login-screen");
+                            showMsg("login", "Session ungültig. Bitte neu einloggen.", "warn");
+                        }
+                    })
+                    .catch(() => {
+                        // fallback: wenigstens den lokalen Stand anzeigen
+                        currentUserId = uid;
+                        stamps = Number.isFinite(sess?.stamps) ? sess.stamps : 0;
+                        updateStampCard();
+
+                        showMsg("stampcard", "Stempel hinzugefügt!", "ok");
+                        showScreen("stampcard-screen");
+                    });
+            }
+        } catch {
+            showScreen("login-screen");
+            showMsg("login", "Bitte einloggen, um den Stempel zu sehen.", "warn");
+        }
+    }
+
+
+
     // Buttons
-    const btnWelcomeNext  = $("btn-welcome-next");
-    const btnToRegister   = $("btn-to-register");
-    const btnLogin        = $("btn-login");
+    const btnWelcomeNext = $("btn-welcome-next");
+    const btnToRegister = $("btn-to-register");
+    const btnLogin = $("btn-login");
     const btnRegisterBack = $("btn-register-back");
     const btnRegisterSave = $("btn-register-save");
-    const btnScan         = $("btn-scan");
-    const btnStampNext    = $("btn-stampadded-next");
-    const btnFreeBack     = $("btn-free-back");
-    const btnFreeRedeem   = $("btn-free-redeem");
-    const btnOpenProfile  = $("btn-open-profile");
-    const btnProfileBack  = $("btn-profile-back");
-    const btnLogout       = $("btn-logout");
+    const btnScan = $("btn-scan");
+    const btnStampNext = $("btn-stampadded-next");
+    const btnFreeBack = $("btn-free-back");
+    const btnFreeRedeem = $("btn-free-redeem");
+    const btnOpenProfile = $("btn-open-profile");
+    const btnProfileBack = $("btn-profile-back");
+    const btnLogout = $("btn-logout");
 
     // Inputs
     const loginEmail = $("login-email");
@@ -312,6 +368,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Auto-login + Session-Validierung
     (async () => {
+        if (cameFromScan) return;
         if (!loadSession()) {
             showScreen("welcome-screen");
             return;
@@ -337,6 +394,7 @@ document.addEventListener("DOMContentLoaded", () => {
             stamps = data.stamps || 0;
 
             updateStampCard();
+
             showMsg("login", `Willkommen zurück, ${currentName || "Gast"}!`, "ok");
             showScreen("stampcard-screen");
         } catch {
@@ -434,7 +492,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-
+    /*
     // Scan (FIXED: Klammern)
     btnScan?.addEventListener("click", async () => {
         if (!currentUserId) {
@@ -467,6 +525,15 @@ document.addEventListener("DOMContentLoaded", () => {
         } finally {
             setLoading(btnScan, false);
         }
+    });
+    */
+
+    btnScan?.addEventListener("click", () => {
+
+        showMsg("stampcard", "Halte dein Handy an die NFC-Karte. Danach öffnet sich Safari automatisch.", "info");
+
+        // Optional: Direkt stamp.html öffnen
+        // window.location.href = "/stamp.html";
     });
 
     btnStampNext?.addEventListener("click", () => showScreen("stampcard-screen"));

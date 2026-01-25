@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>DigiStamp – Stempel</title>
+  <link rel="stylesheet" href="/style.css" />
+  <style>
+    .stamp-page {
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 22px 14px;
+    }
+    .stamp-card {
+      background: #fff;
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.08);
+    }
+    .stamp-status {
+      margin-top: 10px;
+      padding: 12px;
+      border-radius: 12px;
+      background: #ecfdf5;
+      border: 1px solid #a7f3d0;
+      color: #064e3b;
+      display: none;
+      white-space: pre-line;
+    }
+    .stamp-status.error {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #7f1d1d;
+    }
+    .btn {
+      display: inline-block;
+      margin-top: 14px;
+      padding: 10px 14px;
+      border-radius: 12px;
+      background: #1E1A16;
+      color: #fff;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="stamp-page">
+    <div class="stamp-card">
+      <h1>Stempel scannen…</h1>
+      <p id="hint">Einen Moment – wir prüfen deinen Login und buchen den Stempel.</p>
+
+      <div id="status" class="stamp-status"></div>
+      <a id="backLink" class="btn" href="/index.html" style="display:none;">Zurück zur App</a>
+    </div>
+  </div>
+
+  <script>
+    const LS_KEY = "digistamp_session_v1";
+    const maxStamps = 5;
+
+    function showStatus(text, isError=false) {
+      const el = document.getElementById("status");
+      el.textContent = text;
+      el.style.display = "block";
+      el.classList.toggle("error", !!isError);
+    }
+
+    function showBack() {
+      document.getElementById("backLink").style.display = "inline-block";
+    }
+
+    function loadSession() {
+      try {
+        const raw = localStorage.getItem(LS_KEY);
+        if (!raw) return null;
+        const data = JSON.parse(raw);
+        if (!data || !data.currentUserId) return null;
+        return data;
+      } catch {
+        return null;
+      }
+    }
+
+    function saveSession(data) {
+      localStorage.setItem(LS_KEY, JSON.stringify(data));
+    }
+
+    (async () => {
+      const session = loadSession();
+
+      if (!session) {
+        document.getElementById("hint").textContent = "";
+        showStatus(
+          "Du bist auf diesem Handy nicht eingeloggt.\n\nBitte öffne zuerst die DigiStamp-App (und logge dich ein) und scanne danach nochmal.",
+          true
+        );
+        showBack();
+        return;
+      }
+
+      const userId = session.currentUserId;
+
+      try {
+        const res = await fetch(`/api/users/${userId}/scan`, { method: "POST" });
+        const data = await res.json();
+
+        if (!res.ok) {
+          document.getElementById("hint").textContent = "";
+          showStatus(data.error || "Fehler beim Stempeln.", true);
+          showBack();
+          return;
+        }
+
+        // localStorage updaten, damit App direkt neuen Stand kennt
+        session.stamps = data.stamps;
+        saveSession(session);
+
+        document.getElementById("hint").textContent = "";
+        showStatus(`Stempel erhalten!\nStand: ${data.stamps}/${maxStamps}`);
+
+        // kurz warten, dann zurück
+        setTimeout(() => {
+          window.location.href = `/index.html?stamped=1`;
+        }, 900);
+
+      } catch (e) {
+        document.getElementById("hint").textContent = "";
+        showStatus("Backend gerade nicht erreichbar.\nBitte später nochmal scannen.", true);
+        showBack();
+      }
+    })();
+  </script>
+</body>
+</html>
