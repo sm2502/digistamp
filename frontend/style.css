@@ -1,0 +1,376 @@
+/* Grundlayout */
+
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+    margin: 0;
+    padding: 16px 14px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: #F2EEE6;
+    background-image: radial-gradient(rgba(0,0,0,0.03) 1px, transparent 1px);
+    background-size: 24px 24px;
+    box-sizing: border-box;
+    color: #1E1A16;
+
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100svh;
+
+    padding-top: calc(16px + env(safe-area-inset-top));
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+}
+
+
+
+
+
+section {
+    padding: 16px;
+    border-radius: 30px;
+}
+
+/* Karte innen */
+
+#stampcard-screen .card {
+  justify-content: flex-start;
+  min-height: 600px;
+}
+
+
+.card {
+    width: min(92vw, 420px);
+    padding: 32px;
+    box-sizing: border-box;
+    border-radius: 32px;
+    margin-top: 8px;
+    background: linear-gradient(170deg, #F2A96B 0%, #F6C18B 45%, #EFE3D2 100%);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.18);
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    min-height: 600px;
+}
+
+.title {
+    font-size: 28px;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 12px;
+    color: #FFFFFF;
+}
+
+.title-small {
+    font-size: 22px;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+    color: #FFFFFF;
+}
+
+.subtitle {
+    font-size: 14px;
+    margin: 0;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.text-center {
+    text-align: center;
+}
+
+.card-header {
+    justify-content: space-between;
+
+    width: 48px;
+    height: 48px;
+    padding: 12px 16px;
+    border-radius: 50%;
+    border: 1px solid #D4B89C;
+    margin: 0 auto 12px auto;
+    background: #FFFFFF;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.16);
+}
+
+/* Inputs */
+
+
+
+.input {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 18px;
+    border: 2px solid #b97a2a;
+    font-size: 15px;
+    box-sizing: border-box;
+    outline: none;
+    background: rgba(255,255,255,0.9);
+    color: #2B1E16;
+}
+
+.input:focus {
+    border-color: #C28F5A;
+    box-shadow: 0 0 0 2px rgba(194, 143, 90, 0.39);
+}
+
+/* Buttons */
+
+button {
+    font-size: 16px;
+    padding: 14px 22px;
+    border-radius: 28px;
+    border: none;
+    cursor: pointer;
+    transition: 0.15s ease;
+    border: 2px solid #000000;
+}
+
+button.primary {
+     background: #E3944A;
+     border: none;
+     color: #FFFFFF;
+     font-weight: 600;
+     box-shadow: 0 3px 8px rgba(0,0,0,0.18);
+}
+
+button.secondary {
+    background: rgba(255,255,255,0.88);
+    border: 1px solid #D9D4C8;
+    color: #2B1E16;
+    font-weight: 500;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+button:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+.main-button {
+    align-self: center;
+    width: 80%;
+    margin-top: auto;
+    font-weight: 600;
+}
+
+#stampcard-screen .main-button {
+  margin-top: auto;
+  margin-bottom: 8px;
+}
+
+
+.button-row {
+    margin-top: auto;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.button-row button {
+    flex: 1;
+}
+
+.small-btn {
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 14px;
+}
+
+/* drei Punkte */
+
+.icon-button {
+    background: rgba(255, 255, 255, 0.85);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    border: 2px solid #000000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    font-size: 18px;
+    color: #000000;;
+}
+
+/* Willkommen Screen */
+#welcome-screen .card {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    padding-top: 100px;
+    padding-bottom: 20px;
+}
+
+#welcome-screen .subtitle {
+  text-align: center;
+  max-width: 260px;
+  margin: 0 auto;
+}
+
+/* Login & Registrierung */
+#login-screen .card,
+#register-screen .card {
+    justify-content: flex-start;
+    gap: 46px;
+    min-height: 600px;
+}
+
+/* Top-Bar */
+.top-bar {
+    color: #FFFFFFE5;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 15px;
+    font-weight: bold;
+    width: 100%;
+}
+
+/* Stempelkarte */
+.stampcard-box {
+    padding-top: 20px;
+    padding-bottom: 10px;
+    border-radius: 22px;
+    background: rgba(255,255,255,0.45);
+    border: 1px solid #000000;
+    width: 100%;
+    max-width: 360%;
+    margin: 24px auto 0;
+    display: grid;
+    justify-content: center;
+}
+
+.stampcard-title {
+    margin: 0 0 8px 0;
+    font-size: 15px;
+    font-weight: 600;
+    text-align: center;
+    color: #2B1E16;
+}
+
+.stamp-row {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin: 8px 0 12px 0;
+}
+
+.stamp-circle {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid #000000;
+    background: rgba(255,255,255,0.85);
+    box-sizing: border-box;
+    transition: 0.2s ease;
+}
+
+.stamp-circle.filled {
+    background: #E8A15A;
+    border: 2px solid #000000;
+    transform: scale(1.1);
+}
+
+.stamp-circle.gold {
+    background: #C6A866;
+    border: 2px solid #000000;
+}
+
+.stamp-text {
+    font-size: 12px;
+    text-align: center;
+    margin: 10px;
+    color: rgba(43,30,22,0.85);
+}
+
+.progress-bar{
+  width: 100%;
+  height: 12px;
+  border: 2px solid #000;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(255,255,255,0.6);
+  margin-top: 10px;
+}
+
+.progress-fill{
+  height: 100%;
+  width: 0%;
+  display: block;
+  background: #E3944A;
+  transition: width 0.35s ease;
+}
+
+
+.coffee-icon {
+    width: 150px;
+    height: 150px;
+    display: block;
+    margin: 0 auto 30px;
+    object-fit: contain;
+    border: none !important;
+    box-shadow: none;
+}
+
+.avatar-grid{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:10px;
+    margin:10px 0 16px;
+}
+.avatar-btn{
+    font-size:26px;
+    padding:10px 0;
+    border-radius:12px;
+    border:2px solid transparent;
+    background:#f3f3f3;
+    cursor:pointer;
+}
+.avatar-btn.selected{
+    border-color:#333;
+    background:#e8e8e8;
+}
+
+
+.app-msg{
+  display:none;
+  margin-top:12px;
+  padding:10px 14px;
+  border-radius:10px;
+  font-size:0.9rem;
+  text-align:center;
+}
+
+.input-error{
+  outline: 2px solid #ef4444;
+}
+
+
+/* von ChatGpt */
+section {
+  animation: fadeIn 0.4s ease;
+}
+
+#btn-scan{
+    margin-top: 24px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+
+/* Mobile */
+@media (max-width: 420px) {
+    .card {
+        padding: 20px 14px;
+        align-items: stretch;
+    }
+  }

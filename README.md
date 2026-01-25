@@ -62,6 +62,5 @@ Danach  <http://localhost:3000> öffnen\
 ## 5. Wichtig
 
   **Nicht direkt auf `main` arbeiten sondern immer auf `dev`**\
-  
 
 ------------------------------------------------------------------------

@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <title>DigiStamp</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+    <!-- Willkommen -->
+    <section id="welcome-screen">
+      <div class="card">
+        <img class="coffee-icon" src="img/Logoweiß.png" alt="Kaffeetasse" />
+        <h1 class="title">DigiStamp</h1>
+        <p class="subtitle text-center">
+          Herzlich Willkommen bei deiner digitalen Stempelkarte!
+        </p>
+        <button class="primary main-button" id="btn-welcome-next">
+          Weiter
+        </button>
+      </div>
+    </section>
+
+    <!-- Login -->
+    <section id="login-screen" style="display: none">
+      <div class="card">
+        <h1 class="title">DigiStamp</h1>
+
+        <input
+          class="input"
+          type="email"
+          id="login-email"
+          placeholder="E-Mail-Adresse"
+        />
+        <input
+          class="input"
+          type="password"
+          id="login-password"
+          placeholder="Passwort"
+        />
+
+        <div id="login-msg" class="app-msg" aria-live="polite"></div>
+
+        <div class="button-row">
+          <button class="secondary" id="btn-to-register">Registrieren</button>
+          <button class="primary" id="btn-login">Login</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Registrierung -->
+    <section id="register-screen" style="display: none">
+      <div class="card">
+        <h2 class="title-small">Registrierung</h2>
+
+        <input class="input" type="text" id="reg-name" placeholder="Name" />
+        <input
+          class="input"
+          type="email"
+          id="reg-email"
+          placeholder="E-Mail-Adresse"
+        />
+        <input
+          class="input"
+          type="password"
+          id="reg-password"
+          placeholder="Passwort"
+        />
+
+        <div id="register-msg" class="app-msg" aria-live="polite"></div>
+
+        <div class="button-row">
+          <button class="secondary" id="btn-register-back">Zurück</button>
+          <button class="primary" id="btn-register-save">Weiter</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stempelkarte -->
+    <section id="stampcard-screen" style="display: none">
+      <div class="card">
+        <div class="top-bar">
+          <!-- geändert: avatar + name -->
+          <span id="hello-name"
+            ><span id="hello-avatar">☕</span> Hallo Gast</span
+          >
+          <button class="icon-button" id="btn-open-profile">⋯</button>
+        </div>
+
+        <div class="stampcard-box">
+          <p class="stampcard-title">Stempelkarte</p>
+
+          <div class="stamp-row">
+            <span class="stamp-circle"></span>
+            <span class="stamp-circle"></span>
+            <span class="stamp-circle"></span>
+            <span class="stamp-circle"></span>
+            <span class="stamp-circle"></span>
+          </div>
+
+          <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+          </div>
+
+          <p class="stamp-text" id="stamp-text">Noch 5 Kaffee bis gratis</p>
+        </div>
+
+        <div id="stamp-msg" class="app-msg" aria-live="polite"></div>
+
+        <button class="primary main-button" id="btn-scan">Karte scannen</button>
+        <button class="secondary main-button" id="btn-redeem-direct" style="display: none">
+          ☕ Gratis Kaffee einlösen
+        </button>
+      </div>
+    </section>
+
+    <!-- 1 Stempel hinzugefügt -->
+    <section id="stampadded-screen" style="display: none">
+      <div class="card">
+        <div class="card-header"></div>
+        <h2 class="title-small text-center">1 Stempel hinzugefügt</h2>
+        <p class="subtitle text-center" id="stampadded-remaining">
+          5 Stempel fehlen noch.
+        </p>
+        <button class="primary main-button" id="btn-stampadded-next">
+          Weiter
+        </button>
+      </div>
+    </section>
+
+    <!-- Gratis Kaffee einlösen -->
+    <section id="freecoffee-screen" style="display: none">
+      <div class="card">
+        <div class="card-header"></div>
+        <h2 class="title-small text-center">Gratis Kaffee einlösen?</h2>
+        <p class="subtitle text-center" id="freecoffee-text">
+          Du hast 5 Stempel gesammelt.
+        </p>
+
+        <div id="freecoffee-msg" class="app-msg" aria-live="polite"></div>
+
+        <div class="button-row">
+          <button class="secondary" id="btn-free-back">Zurück</button>
+          <button class="primary" id="btn-free-redeem">Einlösen</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Profil -->
+    <section id="profile-screen" style="display: none">
+      <div class="card">
+        <div class="top-bar">
+          <h2 class="title-small">Profil</h2>
+          <button class="secondary small-btn" id="btn-logout">Logout</button>
+        </div>
+
+        <input class="input" id="profile-name" placeholder="Name" />
+        <input class="input" id="profile-email" placeholder="E-Mail" />
+        <input
+          class="input"
+          id="profile-password"
+          placeholder="Passwort"
+          type="password"
+        />
+
+        <!--Profil-Personalisierung -->
+        <hr style="margin: 16px 0; opacity: 0.2" />
+
+        <label class="label">Nickname</label>
+        <input class="input" id="profile-nickname" placeholder="z.B. Elli" />
+
+        <label class="label">Lieblingskaffee</label>
+        <select class="input" id="profile-favcoffee">
+          <option value="">Bitte auswählen…</option>
+          <option value="Espresso">Espresso</option>
+          <option value="Cappuccino">Cappuccino</option>
+          <option value="Latte">Latte</option>
+          <option value="Americano">Americano</option>
+          <option value="Flat White">Flat White</option>
+        </select>
+
+        <p style="margin: 10px 0 6px">Avatar wählen</p>
+        <div id="avatarGrid" class="avatar-grid"></div>
+
+        <div id="profile-msg" class="app-msg" aria-live="polite"></div>
+
+        <button class="primary main-button" id="btn-profile-back">
+          Zurück
+        </button>
+      </div>
+    </section>
+
+    <script src="app.js"></script>
+  </body>
+</html>
