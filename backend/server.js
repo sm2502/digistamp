@@ -42,7 +42,7 @@ app.post('/api/register', async (req, res) => {
     if (!email || !isValidEmail(email)) errors.push({ field: "email", message: "Bitte eine gültige E-Mail-Adresse eingeben." });
     if (!password || String(password).trim().length < 6) errors.push({ field: "password", message: "Passwort muss mindestens 6 Zeichen haben." });
 
-    // name optional, aber wenn vorhanden: nicht nur Leerzeichen
+    // name optional
     if (name !== undefined && String(name).trim().length === 0) {
       errors.push({ field: "name", message: "Name darf nicht leer sein." });
     }
@@ -95,7 +95,6 @@ app.post('/api/login', (req, res) => {
         return res.status(500).json({ error: 'Datenbankfehler beim Login!' });
       }
       if (!row) {
-        // absichtlich generisch
         return res.status(401).json({ error: 'E-Mail oder Passwort falsch!' });
       }
 

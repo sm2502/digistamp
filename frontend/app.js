@@ -54,7 +54,7 @@ function loadSession() {
 }
 
 
-// ---- Profil-Erweiterung (localStorage pro User) ----
+// Profil-Erweiterung (localStorage pro User)
 const PROFILE_META_KEY = "digistamp_profile_meta_v1";
 const AVATARS = ["☕", "😺", "🐶", "🦊", "🐼", "🐸", "🐵", "🦁", "🐯", "🐰", "🍩", "🌿", "⭐", "🔥", "🎉"];
 
@@ -210,7 +210,7 @@ function updateStampCard() {
     const freeCoffeeText = document.getElementById("freecoffee-text");
     const circles = document.querySelectorAll(".stamp-circle");
 
-    // NEU: Avatar + Nickname
+    // Avatar + Nickname
     const meta = getUserMeta();
     const displayName = (meta.nickname && meta.nickname.trim()) ? meta.nickname.trim() : (currentName || "Gast");
 
@@ -218,7 +218,7 @@ function updateStampCard() {
     if (helloAvatarEl) helloAvatarEl.textContent = meta.avatar || "☕";
 
     if (helloNameEl) {
-        // Wenn innerHTML schon Avatar enthält, Text sauber setzen:
+        // Wenn innerHTML schon Avatar enthält, Text setzen
         helloNameEl.innerHTML = `<span id="hello-avatar">${meta.avatar || "☕"}</span> Hallo ${displayName}`;
     }
 
@@ -269,7 +269,7 @@ function updateStampAddedText() {
 document.addEventListener("DOMContentLoaded", () => {
     const $ = (id) => document.getElementById(id);
 
-    // von stamp.html zurückkommen (vor Buttons!)
+    // von stamp.html zurückkommen
     const params = new URLSearchParams(window.location.search);
     const cameFromScan = params.get("stamped") === "1";
 
@@ -277,7 +277,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // URL wieder clean machen
         history.replaceState({}, "", "/index.html");
 
-        // Session DIREKT aus localStorage lesen (weil currentUserId hier noch null ist)
+        // Session direkt aus localStorage lesen
         try {
             const raw = localStorage.getItem(LS_KEY);
             const sess = raw ? JSON.parse(raw) : null;
@@ -308,7 +308,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         }
                     })
                     .catch(() => {
-                        // fallback: wenigstens den lokalen Stand anzeigen
+                        // lokalen Stand anzeigen
                         currentUserId = uid;
                         stamps = Number.isFinite(sess?.stamps) ? sess.stamps : 0;
                         updateStampCard();
@@ -350,7 +350,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const profileEmail = $("profile-email");
     const profilePassword = $("profile-password");
 
-    // NEU: Profil-Inputs
+    // Profil-Inputs
     const profileNickname = $("profile-nickname");
     const profileFavCoffee = $("profile-favcoffee");
 
@@ -542,7 +542,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         showMsg("stampcard", "Halte dein Handy an die NFC-Karte. Danach öffnet sich Safari automatisch.", "info");
 
-        // Optional: Direkt stamp.html öffnen
+        // Direkt stamp.html öffnen
         // window.location.href = "/stamp.html";
     });
 
@@ -633,7 +633,7 @@ document.addEventListener("DOMContentLoaded", () => {
         profileEmail.value = currentEmail || "";
         profilePassword.value = "";
 
-        // NEU: Meta laden
+        // Meta laden
         const meta = getUserMeta();
         if (profileNickname) profileNickname.value = meta.nickname || "";
         if (profileFavCoffee) profileFavCoffee.value = meta.favCoffee || "";
@@ -679,7 +679,7 @@ document.addEventListener("DOMContentLoaded", () => {
             currentEmail = data.email || "";
             stamps = data.stamps || stamps;
 
-            // NEU: Meta lokal speichern
+            // Meta lokal speichern
             const newMeta = {
                 nickname: profileNickname?.value.trim() || "",
                 favCoffee: profileFavCoffee?.value || "",
